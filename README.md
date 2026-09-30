@@ -37,14 +37,14 @@ peluqueria-carolina/
 ## 🚀 Hoja de Ruta (Roadmap)
 
 - [x] **Fase 0: Preparación e Inicialización**
-- [ ] **Fase 1: Frontend Básico (Migración de One Page a Next.js)**
-- [ ] **Fase 2: Backend Básico (Express API)**
-- [ ] **Fase 3: Base de Datos Supabase**
-- [ ] **Fase 4: API de Servicios**
-- [ ] **Fase 5: Sistema de Disponibilidad**
-- [ ] **Fase 6: Gestión de Reservas**
-- [ ] **Fase 7: Integración Frontend + Backend**
-- [ ] **Fase 8: Autenticación y Panel Administrativo**
+- [x] **Fase 1: Frontend Básico (Migración de One Page a Next.js)**
+- [x] **Fase 2: Backend Básico (Express API)**
+- [x] **Fase 3: Base de Datos Supabase**
+- [x] **Fase 4: API de Servicios**
+- [x] **Fase 5: Sistema de Disponibilidad**
+- [x] **Fase 6: Gestión de Reservas**
+- [x] **Fase 7: Integración Frontend + Backend**
+- [x] **Fase 8: Autenticación y Panel Administrativo**
 - [ ] **Fase 9: Automatizaciones con n8n**
 - [ ] **Fase 10: Integración de IA con Google Gemini**
 - [ ] **Fase 11: Despliegue a Producción (Vercel + Railway)**

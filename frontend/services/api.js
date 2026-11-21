@@ -1782,17 +1782,25 @@ export async function reprogramarReservaCliente(id, { fecha, hora_inicio, notas,
 export async function enviarConsultaAsistente(mensaje) {
   try {
     const baseUrl = getBaseUrl();
-    const res = await fetchWithTimeout(`${baseUrl}/asistente/consulta`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const res = await fetchWithTimeout(
+      `${baseUrl}/asistente/consulta`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mensaje }),
       },
-      body: JSON.stringify({ mensaje }),
-    }, 10000);
+      35000,
+      0
+    );
 
-    const json = await res.json();
+    const json = await res.json().catch(() => ({}));
 
     if (!res.ok) {
+      if (json?.data?.respuesta) {
+        return json.data.respuesta;
+      }
       throw new Error(json.message || 'Error al comunicarse con el asistente');
     }
 

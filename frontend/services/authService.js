@@ -6,7 +6,8 @@
  * usando localStorage para persistir el token entre recargas de página.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+import { getApiBaseUrl } from './apiBase';
+
 const TOKEN_KEY = 'carolina_admin_token';
 const USER_KEY = 'carolina_admin_user';
 
@@ -68,7 +69,7 @@ export function isAuthenticated() {
  * @returns {Promise<{ user: object, access_token: string }>}
  */
 export async function login(email, password) {
-  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+  const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -92,7 +93,7 @@ export async function logout() {
 
   try {
     if (token) {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
+      await fetch(`${getApiBaseUrl()}/auth/logout`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -113,7 +114,7 @@ export async function fetchCurrentUser() {
   if (!token) return null;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

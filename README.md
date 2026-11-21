@@ -14,7 +14,7 @@ Plataforma digital integral para la gestión de reservas, catálogo de servicios
 | **Automatización** | n8n (Local / Railway) |
 | **Inteligencia Artificial** | Google Gemini API (Chatbot) |
 | **Mensajería & Notificaciones** | Twilio WhatsApp + Servicio SMTP / Email |
-| **Hosting** | Vercel (Frontend) + Railway (Backend & n8n) |
+| **Hosting** | Vercel |
 
 ---
 
@@ -45,11 +45,11 @@ peluqueria-carolina/
 - [x] **Fase 6: Gestión de Reservas**
 - [x] **Fase 7: Integración Frontend + Backend**
 - [x] **Fase 8: Autenticación y Panel Administrativo**
-- [ ] **Fase 9: Automatizaciones con n8n**
-- [ ] **Fase 10: Integración de IA con Google Gemini**
-- [ ] **Fase 11: Despliegue a Producción (Vercel + Railway)**
-- [ ] **Fase 12: Pruebas, Seguridad y Calidad**
-- [ ] **Fase 13: Documentación Técnica Final**
+- [x] **Fase 9: Automatizaciones con n8n**
+- [x] **Fase 10: Integración de IA con Google Gemini**
+- [x] **Fase 11: Despliegue a Producción (Vercel + Railway)**
+- [x] **Fase 12: Pruebas, Seguridad y Calidad**
+- [x] **Fase 13: Documentación Técnica Final**
 
 ---
 

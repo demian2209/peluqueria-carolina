@@ -4,7 +4,7 @@ export default function FeaturesSection() {
   return (
     <section className="features-section">
       <div className="features-header">
-        <h2 className="features-title">El Estándar Atelier</h2>
+        <h2 className="features-title">El Estándar Peluquería Carolina</h2>
         <p className="features-desc">
           Fusionamos la calidez humana con la precisión algorítmica para ofrecer una experiencia sin precedentes.
         </p>

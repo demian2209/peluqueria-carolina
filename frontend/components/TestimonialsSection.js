@@ -4,16 +4,24 @@ import { useState } from 'react';
 
 const testimonials = [
   {
-    quote: "La precisión con la que el asistente IA predijo el tono de mi cabello fue simplemente asombrosa. Es mucho más que un salón, es una experiencia tecnológica de lujo.",
-    author: "Isabella Montclaire",
+    quote: "Fui por recomendación para hacerme un balayage y quedé feliz con el resultado. Carolina y su equipo son un amor, súper cercanos y profesionales. Se tomaron todo el tiempo de evaluar mi cabello antes de decolorar y me dieron los mejores tips para cuidarlo en casa.",
+    author: "Constanza Morales",
+    tag: "Balayage & Masaje Reparador",
   },
   {
-    quote: "El corte de autor superó todas mis expectativas. La atención personalizada y el nivel de detalle hacen que Peluquería Carolina sea mi espacio favorito.",
-    author: "Valentina Sterling",
+    quote: "Llevo más de un año atendiéndome con ellos y no los cambio por nada. Son súper puntuales con las horas, el salón es impecable y te hacen sentir cómoda desde que entras. Da gusto encontrar gente que trabaje con tanta dedicación.",
+    author: "Marcela Silva",
+    tag: "Corte de Autor & Peinado",
   },
   {
-    quote: "El tratamiento de hidratación con IA revivió por completo mi textura capilar. Increíble servicio y ambiente ultra exclusivo.",
-    author: "Camila De La Torre",
+    quote: "Me salvaron el cabello después de una mala experiencia en otro salón. Me hicieron un tratamiento de botox capilar y un corte que le devolvió la vida y el brillo a mis rulos. La cercanía y el cariño con el que te atienden marca toda la diferencia.",
+    author: "Javiera Castro",
+    tag: "Botox Capilar & Cuidado Integral",
+  },
+  {
+    quote: "Excelente servicio para corte y barba. Matías es muy detallista en cada perfilado y el ambiente es muy grato. Además, poder agendar la hora rápido desde el celular sin tener que esperar confirmaciones largas se agradece un montón.",
+    author: "Rodrigo Fuenzalida",
+    tag: "Corte Caballero & Ritual de Barba",
   },
 ];
 
@@ -45,7 +53,12 @@ export default function TestimonialsSection() {
           </p>
           <div className="author-container">
             <div className="author-line"></div>
-            <p className="author-name">{testimonials[index].author}</p>
+            <div>
+              <p className="author-name">{testimonials[index].author}</p>
+              {testimonials[index].tag && (
+                <p className="author-service-tag">{testimonials[index].tag}</p>
+              )}
+            </div>
             <div className="author-line"></div>
           </div>
         </div>
@@ -53,6 +66,16 @@ export default function TestimonialsSection() {
           <button className="btn-nav" onClick={prev} aria-label="Testimonio anterior">
             <span className="material-symbols-outlined">chevron_left</span>
           </button>
+          <div className="testimonials-dots">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                className={`testimonial-dot ${i === index ? 'active' : ''}`}
+                onClick={() => setIndex(i)}
+                aria-label={`Ver testimonio ${i + 1}`}
+              />
+            ))}
+          </div>
           <button className="btn-nav" onClick={next} aria-label="Siguiente testimonio">
             <span className="material-symbols-outlined">chevron_right</span>
           </button>

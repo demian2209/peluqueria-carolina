@@ -3,11 +3,17 @@
 import { useState } from 'react';
 import { logout } from '../services/authService';
 import AdminReservasList from './AdminReservasList';
+import AdminServiciosList from './AdminServiciosList';
+import AdminBloqueosHorarios from './AdminBloqueosHorarios';
+import AdminEquipoList from './AdminEquipoList';
+import AdminEncuestasList from './AdminEncuestasList';
 
 const TABS = [
   { id: 'reservas', label: 'Reservas', icon: 'calendar_month' },
+  { id: 'horarios', label: 'Horarios y Bloqueos', icon: 'event_busy' },
   { id: 'servicios', label: 'Servicios', icon: 'content_cut' },
   { id: 'estilistas', label: 'Equipo', icon: 'groups' },
+  { id: 'encuestas', label: 'Encuestas', icon: 'reviews' },
 ];
 
 /**
@@ -50,12 +56,15 @@ export default function AdminDashboard({ user, onLogout }) {
             <button
               key={tab.id}
               id={`admin-tab-${tab.id}`}
+              type="button"
               className={`admin-nav-item ${activeTab === tab.id ? 'admin-nav-item--active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              title={tab.label}
             >
-              <span className="material-symbols-outlined">{tab.icon}</span>
-              <span>{tab.label}</span>
-              {activeTab === tab.id && <span className="admin-nav-indicator" />}
+              <span className="material-symbols-outlined" aria-hidden="true">{tab.icon}</span>
+              <span className="admin-nav-label">{tab.label}</span>
+              {activeTab === tab.id && <span className="admin-nav-indicator" aria-hidden="true" />}
             </button>
           ))}
         </nav>
@@ -74,6 +83,7 @@ export default function AdminDashboard({ user, onLogout }) {
             onClick={handleLogout}
             disabled={loggingOut}
             title="Cerrar sesión"
+            aria-label="Cerrar sesión"
           >
             {loggingOut ? (
               <span className="admin-btn-spinner admin-btn-spinner--sm" />
@@ -93,30 +103,50 @@ export default function AdminDashboard({ user, onLogout }) {
             </h1>
             <p className="admin-page-subtitle">
               {activeTab === 'reservas' && 'Gestión y seguimiento de todas las citas'}
-              {activeTab === 'servicios' && 'Catálogo de servicios del salón'}
-              {activeTab === 'estilistas' && 'Equipo de profesionales'}
+              {activeTab === 'horarios' && 'Bloqueo de horas, rangos horarios y días completos sincronizado con reservas'}
+              {activeTab === 'servicios' && 'Catálogo de servicios del salón — Sección "Nuestra Selección"'}
+              {activeTab === 'estilistas' && 'Gestión del personal — Sección "Maestros de la Tijera & Color" y Reservas'}
+              {activeTab === 'encuestas' && 'Resultados, calificaciones y comentarios de las encuestas de satisfacción post-atención'}
             </p>
           </div>
+          <a
+            href={
+              activeTab === 'horarios'
+                ? '/#reservar'
+                : activeTab === 'estilistas'
+                ? '/#estilistas'
+                : activeTab === 'encuestas'
+                ? '/#testimonios'
+                : '/#servicios'
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="admin-btn admin-btn--ghost"
+            title={
+              activeTab === 'horarios'
+                ? 'Ver formulario de reservas en sitio público'
+                : activeTab === 'estilistas'
+                ? 'Ver sección Maestros de la Tijera & Color en sitio público'
+                : activeTab === 'encuestas'
+                ? 'Ver sección de Testimonios en sitio público'
+                : 'Ver sección Nuestra Selección en sitio público'
+            }
+          >
+            <span className="material-symbols-outlined">open_in_new</span>
+            <span>Ver Sitio Público</span>
+          </a>
         </header>
 
         <div className="admin-content">
           {activeTab === 'reservas' && <AdminReservasList />}
 
-          {activeTab === 'servicios' && (
-            <div className="admin-coming-soon">
-              <span className="material-symbols-outlined">content_cut</span>
-              <h3>Gestión de Servicios</h3>
-              <p>Disponible en la próxima iteración.</p>
-            </div>
-          )}
+          {activeTab === 'horarios' && <AdminBloqueosHorarios />}
 
-          {activeTab === 'estilistas' && (
-            <div className="admin-coming-soon">
-              <span className="material-symbols-outlined">groups</span>
-              <h3>Gestión del Equipo</h3>
-              <p>Disponible en la próxima iteración.</p>
-            </div>
-          )}
+          {activeTab === 'servicios' && <AdminServiciosList />}
+
+          {activeTab === 'estilistas' && <AdminEquipoList />}
+
+          {activeTab === 'encuestas' && <AdminEncuestasList />}
         </div>
       </main>
     </div>

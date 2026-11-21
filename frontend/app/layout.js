@@ -6,10 +6,10 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "Peluqueria Carolina | Luxury Hair & AI Atelier",
+  title: "Peluquería Carolina | Alta Peluquería & Cuidado de Autor",
   description:
-    "Experimente la perfección capilar impulsada por inteligencia artificial. Reservas instantáneas y estilismo personalizado en el atelier más exclusivo.",
-  keywords: ["Peluqueria Carolina", "Salon de belleza", "Reserva de citas", "IA Hair", "Atelier"],
+    "Reserva tu cita online en Peluquería Carolina. Diagnóstico capilar personalizado, estilistas profesionales y atención de excelencia en San Fernando.",
+  keywords: ["Peluqueria Carolina", "Salon de belleza", "Reserva de citas", "San Fernando", "Peluquería"],
   authors: [{ name: "Peluquería Carolina" }],
 };
 
@@ -19,6 +19,7 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
       </head>
       <body>{children}</body>
     </html>

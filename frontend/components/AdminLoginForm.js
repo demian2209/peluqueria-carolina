@@ -55,7 +55,7 @@ export default function AdminLoginForm({ onLoginSuccess }) {
                 id="admin-email"
                 type="email"
                 className="admin-form-input"
-                placeholder="admin@peluqueriacarolina.com"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

@@ -1,49 +1,213 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getEstilistas } from '../services/api';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
+import { getEstilistas, suscribirActualizacionEquipo } from '../services/api';
 
-const DEFAULT_PHOTOS = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDuPBlvq6n1v0Isk6me_xzRli1aDaCyE4cUx4ECNPZg7mlADdB94qIRdbe84-bx0X3O_EynyaeOVCOHUdJT1Lmwukc-rM5kvx7R94i_Wv_HGRbAk4KopfNd0Rk_CmwzusWqBEpmHG5hd93E0uQwFhiu85ViFO1JR_KC_5RfaaLhf1R5Z5bcriA77ieEaAypJpPk_ZILvRFGfKE8_SbLLKIzsBG4NPbI_4B3SpzTsClK2lXbDBum8YoFfa1gUFVpWF-V1fO1JVS2HmQ9",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAdmriGzWwZfCFhNaYVj0O8G5CQmddTL0OyzuYPt5LxVb4RnDRwZMJhWOIqg2hhjwbOAYDeIGL2pl2uUXNT1jSvNOVysn6BQP1ib1g6OCs1i0v9MpwhK0seCBOcXRmPf9nzcYhZCDj4Xb-ICwFhbcVnu_OmszrSpPhWEbH7MaiRf9x-ZtB91vRVM2M4UBC0BtQvuGKWZpEX0QIL_MJ28Z9030zbsNEnVD3Sri1yV447HyhW1OeAXrVKxmaa4w0fjVpfxc6Dwt1Nl1pg",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBMquZroNwEUEFaNYljxIQVxbypz3bBICOv5oJy0-wyS-6SWUIL-5qKQeHtG_88OnUGOKvMVELq4Cxw6lgy7LhPaJC0F2fgMTk4nepHY66L7xz37sdH-5afNhIAIKq_JSkvNi7X_G3xMYfh4A2o2ZR5StP5I7z887QY_5B118cYX6yelBzM4v_QsLwsORcLZ4P6cMDW9u0JIQII3hYKt35B4DDM3uvS0WWYEqy2CqJb3nTdjSpqr0vW7L80pj6dF7Ghas3yVFnv2u6s",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDVw9KyDkoisohmcXsVrpJeTIE9sbUSBTkeAP3Mc15_AaRlo1SA8lHXBZLvo6aHjvJgH4EQ-r7UExGrMUY4BHbNeFYJxxg_EikSxuir9aBRBLcxqeOEJKvRRTc4PwYltQ69zI3FsKUNtTBI_t60grbH7fKYXG1orXH4Pb2epHl6XEdsH7QLDq9C8oDKNEUKi-rZob0NEVK4kijjgYzpba-_HNjVNz85b4DBFHGZ59VT32iVg2c7QKV6if7cTpz1nyY-ToWtrLtb9FJv",
-];
+// Mapeo canónico entre estilistas y sus fotografías en /public/images/maestros_tijera/
+const STYLIST_PHOTOS = {
+  'carolina valenzuela': '/images/maestros_tijera/carolina_valenzuela.webp',
+  'matias munoz': '/images/maestros_tijera/matias_munoz.webp',
+  'camila soto': '/images/maestros_tijera/camila_soto.webp',
+  'gonzalo riquelme': '/images/maestros_tijera/gonzalo_riquelme.webp',
+  'valentina morales': '/images/maestros_tijera/valentina_morales.webp',
+};
+
+function getStylistPhoto(member, index) {
+  if (member?.foto_url && !member.foto_url.includes('googleusercontent')) {
+    return member.foto_url;
+  }
+
+  const fullName = `${member?.nombre || ''} ${member?.apellido || ''}`
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
+  for (const [key, path] of Object.entries(STYLIST_PHOTOS)) {
+    if (fullName.includes(key) || key.includes(fullName)) {
+      return path;
+    }
+  }
+
+  const fallbackList = Object.values(STYLIST_PHOTOS);
+  return fallbackList[index % fallbackList.length];
+}
+
+function getDesktopColumns(count) {
+  if (count <= 1) return 1;
+  if (count === 2) return 2;
+  if (count === 3) return 3;
+  if (count === 4) return 4;
+  if (count === 5) return 5;
+  if (count === 6) return 3;
+  return 4;
+}
 
 export default function TeamSection() {
   const [estilistas, setEstilistas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const fetchEstilistas = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError(false);
+    }
+    try {
+      const data = await getEstilistas();
+      if (Array.isArray(data)) {
+        const visibles = data
+          .filter((e) => e && e.activo !== false)
+          .sort((a, b) => Number(a.orden ?? 99) - Number(b.orden ?? 99));
+        setEstilistas(visibles);
+      } else {
+        setEstilistas([]);
+      }
+      setError(false);
+    } catch (err) {
+      console.error('Error cargando estilistas:', err);
+      if (!silent) setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function loadEstilistas() {
-      const data = await getEstilistas();
-      setEstilistas(data);
+    let active = true;
+    const initLoad = async () => {
+      try {
+        const data = await getEstilistas();
+        if (!active) return;
+        if (Array.isArray(data)) {
+          const visibles = data
+            .filter((e) => e && e.activo !== false)
+            .sort((a, b) => Number(a.orden ?? 99) - Number(b.orden ?? 99));
+          setEstilistas(visibles);
+        } else {
+          setEstilistas([]);
+        }
+        setError(false);
+      } catch (err) {
+        console.error('Error cargando estilistas:', err);
+        if (active) setError(true);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    initLoad();
+    const unsubscribe = suscribirActualizacionEquipo(() => {
+      fetchEstilistas(true);
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [fetchEstilistas]);
+
+  const handleSelectStylist = (member) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('seleccionarEstilista', {
+          detail: member.id,
+        })
+      );
+      const bookingEl = document.getElementById('reservar');
+      if (bookingEl) {
+        bookingEl.scrollIntoView({ behavior: 'smooth' });
+      }
     }
-    loadEstilistas();
-  }, []);
+  };
+
+  const totalCount = estilistas.length;
+  const desktopCols = getDesktopColumns(totalCount);
+  const isStaggeredLayout = totalCount >= 4 && totalCount <= 5;
+  const gridLayoutClass = isStaggeredLayout ? 'team-grid--staggered' : 'team-grid--balanced';
 
   return (
     <section className="team-section" id="estilistas">
       <div className="team-container">
         <div className="team-header">
-          <h2 className="team-title">Maestros de la Tijera</h2>
+          <div className="team-badge">
+            <span className="material-symbols-outlined" aria-hidden="true">content_cut</span>
+            <span>MAESTRÍA &amp; DEDICACIÓN</span>
+          </div>
+          <h2 className="team-title">Maestros de la Tijera &amp; Color</h2>
+          <p className="team-subtitle">
+            Detrás de cada transformación hay escucha atenta, técnica impecable y una sincera vocación por cuidar la salud de tu cabello. Conoce al equipo dedicado a realzar tu estilo personal.
+          </p>
         </div>
-        <div className="team-grid">
-          {estilistas.map((member, index) => {
-            const isOffset = index % 2 !== 0;
-            const photo = member.foto_url || DEFAULT_PHOTOS[index % DEFAULT_PHOTOS.length];
-            const name = `${member.nombre} ${member.apellido}`;
-            return (
-              <div key={member.id || index} className={`team-member ${isOffset ? 'offset-y' : ''}`}>
-                <div className="member-img-wrapper">
-                  <img className="member-img" alt={name} src={photo} />
-                  <div className="member-img-overlay"></div>
-                </div>
-                <h3 className="member-name">{name}</h3>
-                <p className="member-role">{member.especialidad}</p>
+
+        {loading ? (
+          <div className="team-grid team-grid--staggered" style={{ '--team-cols': 5 }}>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className={`team-member-skeleton ${i % 2 !== 0 ? 'offset-y' : ''}`}>
+                <div className="skeleton-img-box"></div>
+                <div className="skeleton-line-title"></div>
+                <div className="skeleton-line-subtitle"></div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : error && estilistas.length === 0 ? (
+          <div className="team-error-state">
+            <p>No fue posible cargar el equipo en este momento.</p>
+            <button className="btn-secondary" onClick={() => fetchEstilistas(false)}>
+              Reintentar
+            </button>
+          </div>
+        ) : estilistas.length === 0 ? (
+          <div className="team-error-state">
+            <p>Nuestro equipo estará disponible muy pronto para reservas.</p>
+          </div>
+        ) : (
+          <div
+            className={`team-grid ${gridLayoutClass}`}
+            style={{ '--team-cols': desktopCols }}
+            data-team-count={totalCount}
+          >
+            {estilistas.map((member, index) => {
+              const isOffset = isStaggeredLayout && index % 2 !== 0;
+              const photo = getStylistPhoto(member, index);
+              const useNextImage = typeof photo === 'string' && photo.startsWith('/images/');
+              const name = member.apellido
+                ? member.nombre.toLowerCase().includes(member.apellido.toLowerCase())
+                  ? member.nombre
+                  : `${member.nombre} ${member.apellido}`
+                : member.nombre;
+              const firstName = (member.nombre || 'el estilista').split(' ')[0];
+
+              return (
+                <div key={member.id || index} className={`team-member ${isOffset ? 'offset-y' : ''}`}>
+                  <div className="member-img-wrapper">
+                    <Image
+                      className="member-img"
+                      alt={`Retrato de ${name}`}
+                      src={photo}
+                      width={400}
+                      height={533}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      unoptimized={!useNextImage}
+                    />
+                    <div className="member-img-overlay">
+                      <button
+                        type="button"
+                        className="member-book-btn"
+                        onClick={() => handleSelectStylist(member)}
+                        aria-label={`Reservar con ${firstName}`}
+                      >
+                        <span className="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                        <span>Agendar con {firstName}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <h3 className="member-name">{name}</h3>
+                  {member.especialidad && <p className="member-role">{member.especialidad}</p>}
+                  {member.bio && <p className="member-bio-short">{member.bio}</p>}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

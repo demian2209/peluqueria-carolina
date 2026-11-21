@@ -17,6 +17,12 @@ erDiagram
         numeric precio
         varchar categoria
         bool activo
+        bool en_seleccion
+        int orden
+        text imagen_url
+        varchar etiqueta
+        varchar icono
+        bool destacado
     }
 
     ESTILISTAS {
@@ -55,6 +61,7 @@ erDiagram
 
     RESERVAS {
         uuid id PK
+        varchar codigo_reserva UK
         uuid cliente_id FK
         uuid estilista_id FK
         uuid servicio_id FK

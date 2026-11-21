@@ -1,119 +1,238 @@
 const MOCK_SERVICIOS = [
   {
-    id: "s1-coloracion-couture",
-    nombre: "Coloración Couture",
-    descripcion: "Pigmentación inteligente adaptada a su tono de piel mediante análisis IA. Técnica multi-tono con productos de alta gama.",
-    duracion_min: 120,
-    precio: 120.00,
+    id: "s4-balayage",
+    nombre: "Balayage & Iluminación Morena",
+    descripcion: "Decoloración técnica a mano alzada con protector de enlaces, tonalización de matiz, sellador de cutícula y secado final.",
+    duracion_min: 180,
+    precio: 85000,
     categoria: "coloracion",
-    activo: true
+    activo: true,
+    en_seleccion: true,
+    orden: 1,
+    imagen_url: "/images/servicios/servicio_1.webp",
+    etiqueta: "Alta Coloración & Iluminación",
+    icono: "auto_awesome",
+    destacado: true
   },
   {
-    id: "s2-corte-autor",
-    nombre: "Corte de Autor",
-    descripcion: "Arquitectura capilar basada en la morfología de su rostro. Diseño exclusivo para cada cliente.",
-    duracion_min: 45,
-    precio: 45.00,
+    id: "s1-corte-mujer",
+    nombre: "Corte Mujer + Lavado y Brushing",
+    descripcion: "Diagnóstico visual según morfología de rostro, lavado con masaje capilar, corte técnico de autor y secado con movimiento.",
+    duracion_min: 50,
+    precio: 24990,
     categoria: "corte",
-    activo: true
+    activo: true,
+    en_seleccion: true,
+    orden: 2,
+    imagen_url: "/images/servicios/servicio_2.webp",
+    etiqueta: "Arquitectura Capilar",
+    icono: "content_cut",
+    destacado: false
   },
   {
-    id: "s3-hidratacion-ia",
-    nombre: "Hidratación IA",
-    descripcion: "Tratamiento de hidratación profunda con protocolo personalizado por análisis de IA. Productos de origen natural.",
-    duracion_min: 60,
-    precio: 85.00,
-    categoria: "tratamiento",
-    activo: true
-  },
-  {
-    id: "s4-barberia-elite",
-    nombre: "Barbería Elite",
-    descripcion: "Rituales de afeitado tradicional con tecnología de vaporización. Acabado impecable y duradero.",
-    duracion_min: 30,
-    precio: 35.00,
+    id: "s2-corte-caballero",
+    nombre: "Corte Caballero & Fade",
+    descripcion: "Corte degradado a tijera o máquina (skin fade/taper), lavado refrescante y peinado con fijación mate.",
+    duracion_min: 40,
+    precio: 14990,
     categoria: "barberia",
-    activo: true
+    activo: true,
+    en_seleccion: true,
+    orden: 3,
+    imagen_url: "/images/servicios/servicio_3.webp",
+    etiqueta: "Barbería Clásica & Fade",
+    icono: "face_6",
+    destacado: false
   },
   {
-    id: "s5-peinado-styling",
-    nombre: "Peinado & Styling",
-    descripcion: "Looks editoriales para eventos de alto impacto. Creaciones únicas adaptadas al evento y personalidad.",
+    id: "s3-ritual-barba",
+    nombre: "Ritual de Barba Tradicional",
+    descripcion: "Perfilado con navaja desechable, aplicación de toallas calientes aromatizadas al vapor, bálsamo y aceite nutritivo.",
+    duracion_min: 35,
+    precio: 12000,
+    categoria: "barberia",
+    activo: true,
+    en_seleccion: true,
+    orden: 4,
+    imagen_url: "/images/servicios/servicio_4.webp",
+    etiqueta: "Ritual Tradicional & Vapor",
+    icono: "spa",
+    destacado: false
+  },
+  {
+    id: "s5-coloracion-completa",
+    nombre: "Coloración Completa o Retoque de Raíz",
+    descripcion: "Aplicación de tintura profesional baja en amoníaco, cobertura total de canas, lavado emoliente y baño de brillo final.",
+    duracion_min: 90,
+    precio: 38000,
+    categoria: "coloracion",
+    activo: true,
+    en_seleccion: true,
+    orden: 5,
+    imagen_url: "/images/servicios/servicio_5.webp",
+    etiqueta: "Coloración Couture",
+    icono: "palette",
+    destacado: false
+  },
+  {
+    id: "s6-botox-capilar",
+    nombre: "Botox Capilar Antifrizz",
+    descripcion: "Relleno molecular termoactivo para sellar cutículas abiertas, eliminar el encrespamiento y aportar brillo espejo sin modificar la onda.",
+    duracion_min: 90,
+    precio: 45000,
+    categoria: "tratamiento",
+    activo: true,
+    en_seleccion: true,
+    orden: 6,
+    imagen_url: "/images/servicios/servicio_6.webp",
+    etiqueta: "Relleno Molecular Antifrizz",
+    icono: "water_drop",
+    destacado: false
+  },
+  {
+    id: "s7-alisado-organico",
+    nombre: "Alisado Orgánico Vegano",
+    descripcion: "Alisado progresivo con base de aminoácidos naturales 100% libre de formol, sellado térmico con plancha de titanio y neutralizado.",
+    duracion_min: 150,
+    precio: 65000,
+    categoria: "tratamiento",
+    activo: true,
+    en_seleccion: true,
+    orden: 7,
+    imagen_url: "/images/servicios/servicio_7.webp",
+    etiqueta: "Liso Progresivo Vegano",
+    icono: "eco",
+    destacado: false
+  },
+  {
+    id: "s8-masaje-reparador",
+    nombre: "Masaje Reparador Profundo (K18 / Olaplex)",
+    descripcion: "Tratamiento intensivo de reconexión de enlaces de queratina para cabellos procesados químicamente, con lavado spa y sellado.",
+    duracion_min: 45,
+    precio: 32000,
+    categoria: "tratamiento",
+    activo: true,
+    en_seleccion: true,
+    orden: 8,
+    imagen_url: "/images/servicios/servicio_8.webp",
+    etiqueta: "Tecnología Biomimética (K18)",
+    icono: "health_and_safety",
+    destacado: false
+  },
+  {
+    id: "s9-peinado-social",
+    nombre: "Peinado Social & Ondas al Agua",
+    descripcion: "Preparación capilar con fijación térmica, elaboración de ondas al agua, semirrecogido o peinado de fiesta para eventos.",
     duracion_min: 60,
-    precio: 60.00,
+    precio: 28000,
     categoria: "styling",
-    activo: true
+    activo: true,
+    en_seleccion: true,
+    orden: 9,
+    imagen_url: "/images/servicios/servicio_9.webp",
+    etiqueta: "Estilismo Editorial & Ondas",
+    icono: "auto_awesome",
+    destacado: false
+  },
+  {
+    id: "s10-manicura-rusa",
+    nombre: "Manicura Rusa & Esmaltado Permanente",
+    descripcion: "Limpieza profunda de cutículas con torno, limado anatómico, nivelación de uña natural y esmaltado en gel de larga duración.",
+    duracion_min: 60,
+    precio: 18990,
+    categoria: "manicura",
+    activo: true,
+    en_seleccion: true,
+    orden: 10,
+    imagen_url: "/images/servicios/servicio_10.webp",
+    etiqueta: "Cuidado & Nivelación Rusa",
+    icono: "brush",
+    destacado: false
   }
 ];
 
 const MOCK_ESTILISTAS = [
   {
-    id: "e1-marc-laurent",
-    nombre: "Marc",
-    apellido: "Laurent",
-    especialidad: "Especialista en Color",
-    bio: "Maestro colorista con más de 12 años de experiencia en salones de París y Milán.",
+    id: "e1-carolina-valenzuela",
+    nombre: "Carolina",
+    apellido: "Valenzuela",
+    especialidad: "Directora Técnica & Colorista Especialista",
+    bio: "Directora Técnica y Colorista Especialista con amplia trayectoria en balayage y técnicas avanzadas de color.",
     nivel: "master",
     activo: true,
-    foto_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuDuPBlvq6n1v0Isk6me_xzRli1aDaCyE4cUx4ECNPZg7mlADdB94qIRdbe84-bx0X3O_EynyaeOVCOHUdJT1Lmwukc-rM5kvx7R94i_Wv_HGRbAk4KopfNd0Rk_CmwzusWqBEpmHG5hd93E0uQwFhiu85ViFO1JR_KC_5RfaaLhf1R5Z5bcriA77ieEaAypJpPk_ZILvRFGfKE8_SbLLKIzsBG4NPbI_4B3SpzTsClK2lXbDBum8YoFfa1gUFVpWF-V1fO1JVS2HmQ9",
-    servicios_ids: ["s1-coloracion-couture", "s2-corte-autor", "s5-peinado-styling"]
+    foto_url: "/images/maestros_tijera/carolina_valenzuela.webp",
+    servicios_ids: ["s4-balayage", "s5-coloracion-completa"]
   },
   {
-    id: "e2-elena-russo",
-    nombre: "Elena",
-    apellido: "Russo",
-    especialidad: "Cortes Arquitectónicos",
-    bio: "Estilista de vanguardia formada en Toni & Guy London.",
-    nivel: "master",
-    activo: true,
-    foto_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuAdmriGzWwZfCFhNaYVj0O8G5CQmddTL0OyzuYPt5LxVb4RnDRwZMJhWOIqg2hhjwbOAYDeIGL2pl2uUXNT1jSvNOVysn6BQP1ib1g6OCs1i0v9MpwhK0seCBOcXRmPf9nzcYhZCDj4Xb-ICwFhbcVnu_OmszrSpPhWEbH7MaiRf9x-ZtB91vRVM2M4UBC0BtQvuGKWZpEX0QIL_MJ28Z9030zbsNEnVD3Sri1yV447HyhW1OeAXrVKxmaa4w0fjVpfxc6Dwt1Nl1pg",
-    servicios_ids: ["s2-corte-autor", "s3-hidratacion-ia", "s5-peinado-styling"]
-  },
-  {
-    id: "e3-julian-vance",
-    nombre: "Julian",
-    apellido: "Vance",
-    especialidad: "Master Barber",
-    bio: "Barbero tradicional con técnica moderna. Experto en afeitado clásico y degradados.",
+    id: "e2-matias-munoz",
+    nombre: "Matías",
+    apellido: "Muñoz",
+    especialidad: "Barbero Principal",
+    bio: "Barbero Principal experto en skin fade, perfilado clásico a navaja y cuidado integral masculino.",
     nivel: "artisan",
     activo: true,
-    foto_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuBMquZroNwEUEFaNYljxIQVxbypz3bBICOv5oJy0-wyS-6SWUIL-5qKQeHtG_88OnUGOKvMVELq4Cxw6lgy7LhPaJC0F2fgMTk4nepHY66L7xz37sdH-5afNhIAIKq_JSkvNi7X_G3xMYfh4A2o2ZR5StP5I7z887QY_5B118cYX6yelBzM4v_QsLwsORcLZ4P6cMDW9u0JIQII3hYKt35B4DDM3uvS0WWYEqy2CqJb3nTdjSpqr0vW7L80pj6dF7Ghas3yVFnv2u6s",
-    servicios_ids: ["s2-corte-autor", "s4-barberia-elite"]
+    foto_url: "/images/maestros_tijera/matias_munoz.webp",
+    servicios_ids: ["s2-corte-caballero", "s3-ritual-barba"]
   },
   {
-    id: "e4-sofia-chen",
-    nombre: "Sofia",
-    apellido: "Chen",
-    especialidad: "Tratamientos IA",
-    bio: "Especialista en tricología avanzada y tratamientos personalizados por IA.",
+    id: "e3-camila-soto",
+    nombre: "Camila",
+    apellido: "Soto",
+    especialidad: "Especialista en Tratamientos Capilares & Alisados",
+    bio: "Especialista en salud capilar, alisado progresivo vegano 100% orgánico y terapia molecular K18/Olaplex.",
     nivel: "senior",
     activo: true,
-    foto_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVw9KyDkoisohmcXsVrpJeTIE9sbUSBTkeAP3Mc15_AaRlo1SA8lHXBZLvo6aHjvJgH4EQ-r7UExGrMUY4BHbNeFYJxxg_EikSxuir9aBRBLcxqeOEJKvRRTc4PwYltQ69zI3FsKUNtTBI_t60grbH7fKYXG1orXH4Pb2epHl6XEdsH7QLDq9C8oDKNEUKi-rZob0NEVK4kijjgYzpba-_HNjVNz85b4DBFHGZ59VT32iVg2c7QKV6if7cTpz1nyY-ToWtrLtb9FJv",
-    servicios_ids: ["s1-coloracion-couture", "s3-hidratacion-ia"]
+    foto_url: "/images/maestros_tijera/camila_soto.webp",
+    servicios_ids: ["s6-botox-capilar", "s7-alisado-organico", "s8-masaje-reparador"]
+  },
+  {
+    id: "e4-gonzalo-riquelme",
+    nombre: "Gonzalo",
+    apellido: "Riquelme",
+    especialidad: "Estilista Senior & Peinador",
+    bio: "Estilista Senior y Peinador de producciones y pasarelas, experto en visagismo y arquitectura de corte femenino.",
+    nivel: "master",
+    activo: true,
+    foto_url: "/images/maestros_tijera/gonzalo_riquelme.webp",
+    servicios_ids: ["s1-corte-mujer", "s9-peinado-social"]
+  },
+  {
+    id: "e5-valentina-morales",
+    nombre: "Valentina",
+    apellido: "Morales",
+    especialidad: "Manicurista & Cuidado Integral",
+    bio: "Manicurista profesional especializada en técnica rusa con torno anatómico y nivelación de uña natural.",
+    nivel: "senior",
+    activo: true,
+    foto_url: "/images/maestros_tijera/valentina_morales.webp",
+    servicios_ids: ["s10-manicura-rusa"]
   }
 ];
 
 // Horario semanal por estilista: 0=Dom, 1=Lun, ..., 6=Sáb
 const MOCK_DISPONIBILIDAD = [
-  // Marc Laurent: Lun-Vie 09:00-18:00, Sáb 09:00-14:00
-  ...[ 1, 2, 3, 4, 5 ].map((dia) => ({ estilista_id: "e1-marc-laurent", dia_semana: dia, hora_inicio: "09:00", hora_fin: "18:00" })),
-  { estilista_id: "e1-marc-laurent", dia_semana: 6, hora_inicio: "09:00", hora_fin: "14:00" },
+  // Carolina Valenzuela: Lun-Sáb 09:00-18:00 (Domingo no atiende)
+  ...[ 1, 2, 3, 4, 5, 6 ].map((dia) => ({ estilista_id: "e1-carolina-valenzuela", dia_semana: dia, hora_inicio: "09:00", hora_fin: "18:00" })),
 
-  // Elena Russo: Mar-Sáb 10:00-19:00
-  ...[ 2, 3, 4, 5, 6 ].map((dia) => ({ estilista_id: "e2-elena-russo", dia_semana: dia, hora_inicio: "10:00", hora_fin: "19:00" })),
+  // Matías Muñoz: Lun-Sáb 09:00-17:00 (Domingo no atiende)
+  ...[ 1, 2, 3, 4, 5, 6 ].map((dia) => ({ estilista_id: "e2-matias-munoz", dia_semana: dia, hora_inicio: "09:00", hora_fin: "17:00" })),
 
-  // Julian Vance: Lun-Sáb 09:00-17:00
-  ...[ 1, 2, 3, 4, 5, 6 ].map((dia) => ({ estilista_id: "e3-julian-vance", dia_semana: dia, hora_inicio: "09:00", hora_fin: "17:00" })),
+  // Camila Soto: Mar-Sáb 10:00-19:00
+  ...[ 2, 3, 4, 5, 6 ].map((dia) => ({ estilista_id: "e3-camila-soto", dia_semana: dia, hora_inicio: "10:00", hora_fin: "19:00" })),
 
-  // Sofia Chen: Mié-Dom 10:00-18:00
-  ...[ 3, 4, 5, 6, 0 ].map((dia) => ({ estilista_id: "e4-sofia-chen", dia_semana: dia, hora_inicio: "10:00", hora_fin: "18:00" })),
+  // Gonzalo Riquelme: Lun-Vie 10:00-19:00
+  ...[ 1, 2, 3, 4, 5 ].map((dia) => ({ estilista_id: "e4-gonzalo-riquelme", dia_semana: dia, hora_inicio: "10:00", hora_fin: "19:00" })),
+
+  // Valentina Morales: Mié-Dom 10:00-18:00
+  ...[ 3, 4, 5, 6, 0 ].map((dia) => ({ estilista_id: "e5-valentina-morales", dia_semana: dia, hora_inicio: "10:00", hora_fin: "18:00" })),
 ];
 
 // Reservas de ejemplo para pruebas de colisión
 const MOCK_RESERVAS = [
   {
     id: "r1",
-    estilista_id: "e1-marc-laurent",
+    codigo_reserva: "PC-R1-0900",
+    estilista_id: "e1-carolina-valenzuela",
     fecha: "2026-09-01",
     hora_inicio: "09:00",
     hora_fin: "11:00",
@@ -121,7 +240,8 @@ const MOCK_RESERVAS = [
   },
   {
     id: "r2",
-    estilista_id: "e1-marc-laurent",
+    codigo_reserva: "PC-R2-1400",
+    estilista_id: "e1-carolina-valenzuela",
     fecha: "2026-09-01",
     hora_inicio: "14:00",
     hora_fin: "15:30",
@@ -135,4 +255,3 @@ module.exports = {
   MOCK_DISPONIBILIDAD,
   MOCK_RESERVAS,
 };
-

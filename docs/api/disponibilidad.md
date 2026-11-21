@@ -32,9 +32,9 @@ Base URL: `/api/v1/disponibilidad`
   "status": "success",
   "source": "mock",
   "data": {
-    "estilista_id": "e1-marc-laurent",
+    "estilista_id": "e1-carolina-valenzuela",
     "fecha": "2026-09-01",
-    "duracion_min": 45,
+    "duracion_min": 180,
     "trabaja_ese_dia": true,
     "slots_disponibles": ["11:00", "11:30", "12:00", "12:30", "13:00", "15:30", "16:00", "16:30", "17:00"],
     "total_slots": 9
@@ -76,13 +76,13 @@ Base URL: `/api/v1/disponibilidad`
   "status": "success",
   "data": {
     "fecha": "2026-09-01",
-    "servicio_id": "s2-corte-autor",
-    "duracion_min": 45,
+    "servicio_id": "s4-balayage",
+    "duracion_min": 180,
     "estilistas": [
       {
-        "estilista_id": "e1-marc-laurent",
-        "nombre_completo": "Marc Laurent",
-        "especialidad": "Especialista en Color",
+        "estilista_id": "e1-carolina-valenzuela",
+        "nombre_completo": "Carolina Valenzuela",
+        "especialidad": "Directora Técnica & Colorista Especialista",
         "nivel": "master",
         "trabaja_ese_dia": true,
         "slots_disponibles": ["11:00", "11:30", "13:00"],

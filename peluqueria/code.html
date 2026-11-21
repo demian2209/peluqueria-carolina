@@ -40,26 +40,30 @@
             <div class="hero-bg">
                 <img alt="Modern Salon Interior" class="hero-img"
                     data-alt="ultra-modern minimalist hair salon with warm ambient lighting, marble floors, and champagne gold accents in a luxury editorial style"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKpmGu15XfL_MnnSM4_Cef1EhhAem5tlTOcOoErrgfkl2Twr96kfsns1_e_htv4H677kPx8mMZvwWGOYSV4_k9_1oxxr1NzW4XSfrXU0BxWsJGR6VMxD21nnW2ksN2GIZyo8qLVKQbUBeNOa8WY2ixGtNacifqtz56xR6E1RqZ0JVKeWmROqwcwo-JmjaRZZtq5l03DEeNhM4-I9pfJLjoHQdbLJU4FG3YQXbhmXhXGp_wFF73m_QVlRV3vX9Ii4heWMmYDI89rhiN" />
+                    src="../frontend/public/images/img-hero.webp" />
                 <div class="hero-overlay"></div>
             </div>
             <div class="hero-container">
                 <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="material-symbols-outlined hero-badge-icon" aria-hidden="true">auto_awesome</span>
+                        <span>ALTA PELUQUERÍA &amp; CUIDADO DE AUTOR</span>
+                    </div>
                     <h1 class="hero-title">
-                        El Futuro de la <br /><span>Belleza, Hoy</span>
+                        El Arte del Estilismo, <br /><span>Diseñado para Ti</span>
                     </h1>
                     <p class="hero-subtitle">
-                        Experimente la perfección capilar impulsada por inteligencia artificial. Reservas instantáneas y
-                        estilismo personalizado en el atelier más exclusivo.
+                        Te damos la bienvenida a un espacio donde la maestría de nuestros estilistas y la atención
+                        personalizada resaltan la belleza natural de tu cabello. Reserva tu cita en segundos y disfruta
+                        una experiencia pensada en tu bienestar.
                     </p>
                     <div class="hero-buttons">
-                        <a href="#reservar">
-                            <button class="btn-gradient">
-                                Reservar cita
-                            </button>
+                        <a href="#reservar" class="btn-gradient">
+                            Reservar cita
                         </a>
-                        <button class="btn-secondary">
-                            Hablar con el asistente
+                        <button class="btn-secondary hero-btn-assistant" aria-label="Abrir asistente de belleza virtual">
+                            <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+                            <span>Asistente de Belleza</span>
                         </button>
                     </div>
                 </div>
@@ -178,9 +182,16 @@
                             <label class="form-label">Servicio</label>
                             <select class="form-select">
                                 <option>Seleccione un servicio</option>
-                                <option>Coloración Couture</option>
-                                <option>Corte de Autor</option>
-                                <option>Hidratación IA</option>
+                                <option>Corte Mujer + Lavado y Brushing ($24.990)</option>
+                                <option>Corte Caballero & Fade ($14.990)</option>
+                                <option>Ritual de Barba Tradicional ($12.000)</option>
+                                <option>Balayage & Iluminación Morena ($85.000)</option>
+                                <option>Coloración Completa o Retoque de Raíz ($38.000)</option>
+                                <option>Botox Capilar Antifrizz ($45.000)</option>
+                                <option>Alisado Orgánico Vegano ($65.000)</option>
+                                <option>Masaje Reparador Profundo (K18 / Olaplex) ($32.000)</option>
+                                <option>Peinado Social & Ondas al Agua ($28.000)</option>
+                                <option>Manicura Rusa & Esmaltado Permanente ($18.990)</option>
                             </select>
                         </div>
                         <div class="form-row">
@@ -201,49 +212,17 @@
                             <label class="form-label">Estilista Preferido</label>
                             <select class="form-select">
                                 <option>Cualquier estilista disponible</option>
-                                <option>Marc Laurent</option>
-                                <option>Elena Russo</option>
-                                <option>Sofia Chen</option>
+                                <option>Carolina Valenzuela (Directora Técnica & Colorista Especialista)</option>
+                                <option>Matías Muñoz (Barbero Principal)</option>
+                                <option>Camila Soto (Especialista en Tratamientos Capilares & Alisados)</option>
+                                <option>Gonzalo Riquelme (Estilista Senior & Peinador)</option>
+                                <option>Valentina Morales (Manicurista & Cuidado Integral)</option>
                             </select>
                         </div>
                         <button class="btn-submit" type="button">
                             Finalizar Reserva
                         </button>
                     </form>
-                </div>
-            </div>
-        </section>
-        <!-- Why Choose Us -->
-        <section class="features-section">
-            <div class="features-header">
-                <h2 class="features-title">El Estándar Atelier</h2>
-                <p class="features-desc">Fusionamos la calidez humana con la precisión algorítmica para
-                    ofrecer una experiencia sin precedentes.</p>
-            </div>
-            <div class="features-grid">
-                <div class="features-item">
-                    <div class="features-icon-container">
-                        <span class="material-symbols-outlined">schedule</span>
-                    </div>
-                    <h3 class="features-item-title">Disponibilidad 24/7</h3>
-                    <p class="features-item-desc">Reserve en cualquier momento a través
-                        de nuestra IA, sin llamadas ni tiempos de espera.</p>
-                </div>
-                <div class="features-item">
-                    <div class="features-icon-container">
-                        <span class="material-symbols-outlined">psychology</span>
-                    </div>
-                    <h3 class="features-item-title">Cuidado Personalizado</h3>
-                    <p class="features-item-desc">Nuestro sistema recuerda cada
-                        preferencia y detalle técnico de sus visitas anteriores.</p>
-                </div>
-                <div class="features-item">
-                    <div class="features-icon-container">
-                        <span class="material-symbols-outlined">notifications_active</span>
-                    </div>
-                    <h3 class="features-item-title">Alertas Inteligentes</h3>
-                    <p class="features-item-desc">Le avisamos cuando es el momento
-                        ideal para su próximo retoque basado en su estilo de vida.</p>
                 </div>
             </div>
         </section>
@@ -314,12 +293,11 @@
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                     </div>
                     <p class="testimonial-text">
-                        "La precisión con la que el asistente IA predijo el tono de mi cabello fue simplemente
-                        asombrosa. Es mucho más que un salón, es una experiencia tecnológica de lujo."
+                        "Fui por recomendación para hacerme un balayage y quedé feliz con el resultado. Carolina y su equipo son un amor, súper cercanos y profesionales. Se tomaron todo el tiempo de evaluar mi cabello antes de decolorar y me dieron los mejores tips para cuidarlo en casa."
                     </p>
                     <div class="author-container">
                         <div class="author-line"></div>
-                        <p class="author-name">Isabella Montclaire</p>
+                        <p class="author-name">Constanza Morales</p>
                         <div class="author-line"></div>
                     </div>
                 </div>
@@ -336,38 +314,87 @@
         <!-- FAQ Accordion -->
         <section class="faq-section" id="faq">
             <div class="faq-container">
-                <h2 class="faq-title">Preguntas Frecuentes</h2>
-                <div class="faq-list">
-                    <div class="faq-item">
-                        <button class="faq-trigger">
-                            <span class="faq-question">¿Cómo funciona el análisis de IA?</span>
-                            <span class="material-symbols-outlined faq-icon">add</span>
-                        </button>
-                        <div class="faq-answer">
-                            Nuestra IA analiza su estructura facial y tono de piel a través de una breve interacción
-                            visual para recomendar estilos que maximicen su potencial estético.
-                        </div>
+                <div class="faq-header">
+                    <div class="faq-badge">
+                        <span class="material-symbols-outlined" aria-hidden="true">help</span>
+                        <span>TRANSPARENCIA &amp; CONFIANZA</span>
                     </div>
+                    <h2 class="faq-title">Preguntas Frecuentes</h2>
+                    <p class="faq-subtitle">
+                        Queremos que te sientas en confianza y bien acompañada desde el primer momento. Aquí resolvemos las dudas más habituales de nuestras clientas.
+                    </p>
+                </div>
+                <div class="faq-list">
                     <div class="faq-item active">
-                        <button class="faq-trigger">
-                            <span class="faq-question">¿Puedo cancelar o cambiar mi cita?</span>
+                        <button class="faq-trigger" aria-expanded="true">
+                            <span class="faq-question">¿Cómo sé qué servicio o color es el más adecuado para mi cabello?</span>
                             <span class="material-symbols-outlined faq-icon">remove</span>
                         </button>
                         <div class="faq-answer">
-                            Absolutamente. Puede gestionar su reserva 24/7 a través de nuestro Asistente Virtual o
-                            WhatsApp con solo un par de clics hasta 12 horas antes.
+                            Al llegar a tu cita, tu estilista realizará una conversación de visagismo y diagnóstico capilar para evaluar la salud de tu fibra, tu tono de piel y tu estilo de vida. Además, puedes consultar previamente con nuestro Asistente de Belleza online para inspirarte y recibir recomendaciones personalizadas.
                         </div>
                     </div>
                     <div class="faq-item">
-                        <button class="faq-trigger">
-                            <span class="faq-question">¿Los precios varían según el estilista?</span>
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span class="faq-question">¿Puedo cancelar o reprogramar mi cita si tengo un imprevisto?</span>
                             <span class="material-symbols-outlined faq-icon">add</span>
                         </button>
                         <div class="faq-answer">
-                            Nuestra estructura de precios es transparente y se basa en la categoría del profesional
-                            elegido (Artisan o Master).
+                            ¡Por supuesto! Comprendemos que tus planes pueden cambiar. Puedes reprogramar o cancelar tu reserva con hasta 12 horas de anticipación directamente desde el mensaje de confirmación en WhatsApp o en nuestra web, sin recargo alguno.
                         </div>
                     </div>
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span class="faq-question">¿Cuánto tiempo dura una sesión de corte, coloración o alisado?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </button>
+                        <div class="faq-answer">
+                            Nos tomamos el tiempo necesario para cada detalle sin prisas. Un corte de autor toma alrededor de 50 minutos, mientras que rituales profundos como balayage o alisados orgánicos toman entre 2 y 3 horas. Te invitamos a relajarte con un café de especialidad mientras cuidamos de ti.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span class="faq-question">¿Los precios varían según el estilista que elija?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </button>
+                        <div class="faq-answer">
+                            Nuestra política es de absoluta transparencia: siempre verás el precio final y sin sorpresas antes de confirmar tu reserva. Las tarifas varían sutilmente según la trayectoria y especialidad del profesional elegido (Artisan o Master).
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span class="faq-question">¿Cómo debo preparar mi cabello antes de mi sesión de color?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </button>
+                        <div class="faq-answer">
+                            Para servicios de coloración o balayage, recomendamos no lavar el cabello el mismo día de la cita; los aceites naturales forman una película protectora ideal para el cuero cabelludo. Para cortes y peinados sociales, nosotros nos encargamos del lavado relajante previo.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-trigger" aria-expanded="false">
+                            <span class="faq-question">¿Qué medios de pago aceptan en el salón?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </button>
+                        <div class="faq-answer">
+                            Aceptamos todas las tarjetas de crédito y débito (con opciones de pago en cuotas según tu banco), transferencias electrónicas y efectivo. El pago se efectúa tranquilamente en el salón al finalizar tu servicio.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-contact-card">
+                    <div class="faq-contact-icon">
+                        <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span>
+                    </div>
+                    <div class="faq-contact-info">
+                        <h4 class="faq-contact-title">¿Tienes una consulta específica para tu cabello?</h4>
+                        <p class="faq-contact-text">
+                            Estamos para asesorarte. Chatea con nuestro asistente para resolver cualquier inquietud antes de agendar.
+                        </p>
+                    </div>
+                    <button type="button" class="faq-contact-btn">
+                        <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+                        <span>Hablar con IA</span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -375,38 +402,72 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <div class="footer-col">
-                <div class="footer-brand">Peluqueria Carolina</div>
+            <div class="footer-col footer-col-main">
+                <div class="footer-brand">Peluquería Carolina</div>
                 <p class="footer-brand-text">
-                    Luxury Hair &amp; Computational Intelligence.<br />Innovación al servicio de su estilo.
+                    Salón de alta peluquería y cuidado capilar de autor en San Fernando. Un espacio donde la calidez humana, la maestría técnica y tu bienestar se unen para realzar tu belleza natural.
                 </p>
+                <div class="footer-social-links">
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+                        <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+                    </a>
+                    <a href="https://wa.me/56956469111" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="WhatsApp">
+                        <span class="material-symbols-outlined" aria-hidden="true">chat</span>
+                    </a>
+                    <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Ubicación">
+                        <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-col-title">Salón &amp; Horarios</h4>
+                <div class="footer-contact-details">
+                    <p class="footer-detail-item">
+                        <span class="material-symbols-outlined" aria-hidden="true">pin_drop</span>
+                        <span>Av. Bernardo O'Higgins 642, San Fernando</span>
+                    </p>
+                    <p class="footer-detail-item">
+                        <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                        <span>Mar a Sáb: 10:00 – 20:00 hrs<br />Dom y Lun: Cerrado</span>
+                    </p>
+                    <p class="footer-detail-item">
+                        <span class="material-symbols-outlined" aria-hidden="true">phone_iphone</span>
+                        <span>+56 9 5646 9111</span>
+                    </p>
+                </div>
             </div>
             <div class="footer-col">
                 <h4 class="footer-col-title">Explorar</h4>
                 <ul class="footer-links">
-                    <li><a href="#">Inicio</a></li>
-                    <li><a href="#">Sobre nosotros</a></li>
+                    <li><a href="#servicios">Servicios de Autor</a></li>
+                    <li><a href="#estilistas">Maestros de la Tijera</a></li>
+                    <li><a href="#reservar">Reservar Experiencia</a></li>
+                    <li><a href="#testimonios">Opiniones de Clientas</a></li>
+                    <li><a href="#faq">Preguntas Frecuentes</a></li>
                 </ul>
             </div>
             <div class="footer-col">
-                <h4 class="footer-col-title">Legal</h4>
-                <ul class="footer-links">
-                    <li><a href="#">Privacidad</a></li>
-                    <li><a href="#">Términos</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4 class="footer-col-title">Newsletter</h4>
+                <h4 class="footer-col-title">Círculo Privado</h4>
+                <p class="footer-newsletter-desc">
+                    Recibe tendencias, consejos de salud capilar y beneficios exclusivos en tu email.
+                </p>
                 <div class="footer-newsletter">
-                    <input class="newsletter-input" placeholder="SU EMAIL" type="email" />
-                    <button class="newsletter-btn">
+                    <input class="newsletter-input" placeholder="Tu correo electrónico" type="email" />
+                    <button class="newsletter-btn" type="button" aria-label="Suscribirse">
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </button>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p class="footer-copyright">© 2026 Peluqueria Carolina</p>
+            <div class="footer-bottom-container">
+                <p class="footer-copyright">© 2026 Peluquería Carolina · Todos los derechos reservados</p>
+                <div class="footer-legal-links">
+                    <a href="#privacidad">Política de Privacidad</a>
+                    <span>·</span>
+                    <a href="#terminos">Términos de Servicio</a>
+                </div>
+            </div>
         </div>
     </footer>
 

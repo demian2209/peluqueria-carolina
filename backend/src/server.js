@@ -3,6 +3,8 @@ const app = require('./app');
 const supabase = require('./database/supabaseClient');
 const { checkDatabaseConnection } = require('./database/checkConnection');
 
+const { iniciarCronWorkers, detenerCronWorkers } = require('./services/cron.service');
+
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
@@ -21,6 +23,19 @@ const startServer = async () => {
     console.log(`📡 Escuchando en el puerto: ${PORT}`);
     console.log(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
     console.log(`=================================`);
+
+    // Iniciar workers de tareas en segundo plano (Pilar C y D)
+    iniciarCronWorkers();
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n❌ Error: El puerto ${PORT} ya está en uso.`);
+      console.error(`   Asegúrate de cerrar cualquier otra terminal o proceso previo ejecutándose en el puerto ${PORT}.\n`);
+    } else {
+      console.error('❌ Error al iniciar el servidor HTTP:', err);
+    }
+    process.exit(1);
   });
 
   // Manejo de errores no capturados

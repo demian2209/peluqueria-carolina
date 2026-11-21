@@ -1,131 +1,132 @@
 -- ==========================================
--- SEEDS - DATOS DE PRUEBA
+-- SEEDS - DATOS OFICIALES
 -- Peluquería Carolina
 -- ==========================================
 
 -- ==========================================
--- SERVICIOS
+-- SERVICIOS (10 Servicios Oficiales - Nuestra Selección)
 -- ==========================================
-INSERT INTO servicios (nombre, descripcion, duracion_min, precio, categoria) VALUES
+INSERT INTO servicios (nombre, descripcion, duracion_min, precio, categoria, activo, en_seleccion, orden, imagen_url, etiqueta, icono, destacado) VALUES
 (
-    'Coloración Couture',
-    'Pigmentación inteligente adaptada a su tono de piel mediante análisis IA. Técnica multi-tono con productos de alta gama.',
-    120, 120.00, 'coloracion'
+    'Balayage & Iluminación Morena',
+    'Decoloración técnica a mano alzada con protector de enlaces, tonalización de matiz, sellador de cutícula y secado final.',
+    180, 85000.00, 'coloracion', true, true, 1, '/images/servicios/servicio_1.webp', 'Alta Coloración & Iluminación', 'auto_awesome', true
 ),
 (
-    'Corte de Autor',
-    'Arquitectura capilar basada en la morfología de su rostro. Diseño exclusivo para cada cliente.',
-    45, 45.00, 'corte'
+    'Corte Mujer + Lavado y Brushing',
+    'Diagnóstico visual según morfología de rostro, lavado con masaje capilar, corte técnico de autor y secado con movimiento.',
+    50, 24990.00, 'corte', true, true, 2, '/images/servicios/servicio_2.webp', 'Arquitectura Capilar', 'content_cut', false
 ),
 (
-    'Hidratación IA',
-    'Tratamiento de hidratación profunda con protocolo personalizado por análisis de IA. Productos de origen natural.',
-    60, 85.00, 'tratamiento'
+    'Corte Caballero & Fade',
+    'Corte degradado a tijera o máquina (skin fade/taper), lavado refrescante y peinado con fijación mate.',
+    40, 14990.00, 'barberia', true, true, 3, '/images/servicios/servicio_3.webp', 'Barbería Clásica & Fade', 'face_6', false
 ),
 (
-    'Barbería Elite',
-    'Rituales de afeitado tradicional con tecnología de vaporización. Acabado impecable y duradero.',
-    30, 35.00, 'barberia'
+    'Ritual de Barba Tradicional',
+    'Perfilado con navaja desechable, aplicación de toallas calientes aromatizadas al vapor, bálsamo y aceite nutritivo.',
+    35, 12000.00, 'barberia', true, true, 4, '/images/servicios/servicio_4.webp', 'Ritual Tradicional & Vapor', 'spa', false
 ),
 (
-    'Peinado & Styling',
-    'Looks editoriales para eventos de alto impacto. Creaciones únicas adaptadas al evento y personalidad.',
-    60, 60.00, 'styling'
+    'Coloración Completa o Retoque de Raíz',
+    'Aplicación de tintura profesional baja en amoníaco, cobertura total de canas, lavado emoliente y baño de brillo final.',
+    90, 38000.00, 'coloracion', true, true, 5, '/images/servicios/servicio_5.webp', 'Coloración Couture', 'palette', false
+),
+(
+    'Botox Capilar Antifrizz',
+    'Relleno molecular termoactivo para sellar cutículas abiertas, eliminar el encrespamiento y aportar brillo espejo sin modificar la onda.',
+    90, 45000.00, 'tratamiento', true, true, 6, '/images/servicios/servicio_6.webp', 'Relleno Molecular Antifrizz', 'water_drop', false
+),
+(
+    'Alisado Orgánico Vegano',
+    'Alisado progresivo con base de aminoácidos naturales 100% libre de formol, sellado térmico con plancha de titanio y neutralizado.',
+    150, 65000.00, 'tratamiento', true, true, 7, '/images/servicios/servicio_7.webp', 'Liso Progresivo Vegano', 'eco', false
+),
+(
+    'Masaje Reparador Profundo (K18 / Olaplex)',
+    'Tratamiento intensivo de reconexión de enlaces de queratina para cabellos procesados químicamente, con lavado spa y sellado.',
+    45, 32000.00, 'tratamiento', true, true, 8, '/images/servicios/servicio_8.webp', 'Tecnología Biomimética (K18)', 'health_and_safety', false
+),
+(
+    'Peinado Social & Ondas al Agua',
+    'Preparación capilar con fijación térmica, elaboración de ondas al agua, semirrecogido o peinado de fiesta para eventos.',
+    60, 28000.00, 'styling', true, true, 9, '/images/servicios/servicio_9.webp', 'Estilismo Editorial & Ondas', 'auto_awesome', false
+),
+(
+    'Manicura Rusa & Esmaltado Permanente',
+    'Limpieza profunda de cutículas con torno, limado anatómico, nivelación de uña natural y esmaltado en gel de larga duración.',
+    60, 18990.00, 'manicura', true, true, 10, '/images/servicios/servicio_10.webp', 'Cuidado & Nivelación Rusa', 'brush', false
 );
 
 -- ==========================================
--- ESTILISTAS
+-- ESTILISTAS (5 Estilistas Oficiales)
 -- ==========================================
-INSERT INTO estilistas (nombre, apellido, especialidad, bio, nivel) VALUES
+INSERT INTO estilistas (nombre, apellido, especialidad, bio, nivel, activo) VALUES
 (
-    'Marc', 'Laurent',
-    'Especialista en Color',
-    'Maestro colorista con más de 12 años de experiencia en salones de París y Milán. Especializado en técnicas de balayage y coloración multi-dimensional.',
-    'master'
+    'Carolina', 'Valenzuela',
+    'Directora Técnica & Colorista Especialista',
+    'Directora Técnica y Colorista Especialista con amplia trayectoria en balayage y técnicas avanzadas de coloración.',
+    'master', true
 ),
 (
-    'Elena', 'Russo',
-    'Cortes Arquitectónicos',
-    'Estilista de vanguardia formada en Toni & Guy London. Sus cortes geométricos y estructurales son su marca distintiva.',
-    'master'
+    'Matías', 'Muñoz',
+    'Barbero Principal',
+    'Barbero Principal experto en skin fade, perfilado clásico a navaja y rituales tradicionales de barbería.',
+    'artisan', true
 ),
 (
-    'Julian', 'Vance',
-    'Master Barber',
-    'Barbero tradicional con técnica moderna. Experto en afeitado clásico, degradados precisos y diseño de barba.',
-    'artisan'
+    'Camila', 'Soto',
+    'Especialista en Tratamientos Capilares & Alisados',
+    'Especialista en salud capilar, alisado progresivo vegano 100% orgánico y protocolos moleculares K18/Olaplex.',
+    'senior', true
 ),
 (
-    'Sofia', 'Chen',
-    'Tratamientos IA',
-    'Especialista en tricología avanzada y tratamientos personalizados. Pionera en la integración de análisis de IA para diagnóstico capilar.',
-    'senior'
+    'Gonzalo', 'Riquelme',
+    'Estilista Senior & Peinador',
+    'Estilista Senior y Peinador, maestro en corte femenino de autor, brushing estructurado y peinados para eventos.',
+    'master', true
+),
+(
+    'Valentina', 'Morales',
+    'Manicurista & Cuidado Integral',
+    'Manicurista profesional especializada en manicura rusa anatómica con torno y esmaltado permanente.',
+    'senior', true
 );
 
 -- ==========================================
--- ESTILISTA_SERVICIOS (relaciones)
+-- ESTILISTA_SERVICIO (relaciones)
 -- ==========================================
--- Marc Laurent: Coloración, Corte, Styling
-INSERT INTO estilista_servicios (estilista_id, servicio_id)
+-- Carolina Valenzuela: Balayage & Iluminación Morena, Coloración Completa o Retoque de Raíz
+INSERT INTO estilista_servicio (estilista_id, servicio_id)
 SELECT e.id, s.id
 FROM estilistas e, servicios s
-WHERE e.nombre = 'Marc' AND e.apellido = 'Laurent'
-  AND s.nombre IN ('Coloración Couture', 'Corte de Autor', 'Peinado & Styling');
+WHERE e.nombre = 'Carolina' AND e.apellido = 'Valenzuela'
+  AND s.nombre IN ('Balayage & Iluminación Morena', 'Coloración Completa o Retoque de Raíz');
 
--- Elena Russo: Corte, Styling, Hidratación
-INSERT INTO estilista_servicios (estilista_id, servicio_id)
+-- Matías Muñoz: Corte Caballero & Fade, Ritual de Barba Tradicional
+INSERT INTO estilista_servicio (estilista_id, servicio_id)
 SELECT e.id, s.id
 FROM estilistas e, servicios s
-WHERE e.nombre = 'Elena' AND e.apellido = 'Russo'
-  AND s.nombre IN ('Corte de Autor', 'Peinado & Styling', 'Hidratación IA');
+WHERE e.nombre = 'Matías' AND e.apellido = 'Muñoz'
+  AND s.nombre IN ('Corte Caballero & Fade', 'Ritual de Barba Tradicional');
 
--- Julian Vance: Barbería, Corte
-INSERT INTO estilista_servicios (estilista_id, servicio_id)
+-- Camila Soto: Botox Capilar Antifrizz, Alisado Orgánico Vegano, Masaje Reparador Profundo (K18 / Olaplex)
+INSERT INTO estilista_servicio (estilista_id, servicio_id)
 SELECT e.id, s.id
 FROM estilistas e, servicios s
-WHERE e.nombre = 'Julian' AND e.apellido = 'Vance'
-  AND s.nombre IN ('Barbería Elite', 'Corte de Autor');
+WHERE e.nombre = 'Camila' AND e.apellido = 'Soto'
+  AND s.nombre IN ('Botox Capilar Antifrizz', 'Alisado Orgánico Vegano', 'Masaje Reparador Profundo (K18 / Olaplex)');
 
--- Sofia Chen: Hidratación, Coloración
-INSERT INTO estilista_servicios (estilista_id, servicio_id)
+-- Gonzalo Riquelme: Corte Mujer + Lavado y Brushing, Peinado Social & Ondas al Agua
+INSERT INTO estilista_servicio (estilista_id, servicio_id)
 SELECT e.id, s.id
 FROM estilistas e, servicios s
-WHERE e.nombre = 'Sofia' AND e.apellido = 'Chen'
-  AND s.nombre IN ('Hidratación IA', 'Coloración Couture');
+WHERE e.nombre = 'Gonzalo' AND e.apellido = 'Riquelme'
+  AND s.nombre IN ('Corte Mujer + Lavado y Brushing', 'Peinado Social & Ondas al Agua');
 
--- ==========================================
--- DISPONIBILIDAD (Horario laboral semanal)
--- dia_semana: 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
--- ==========================================
--- Marc Laurent: Lun-Vie 09:00-18:00, Sab 09:00-14:00
-INSERT INTO disponibilidad (estilista_id, dia_semana, hora_inicio, hora_fin)
-SELECT e.id, dias.dia, '09:00', '18:00'
-FROM estilistas e,
-     (VALUES (1),(2),(3),(4),(5)) AS dias(dia)
-WHERE e.nombre = 'Marc' AND e.apellido = 'Laurent';
-
-INSERT INTO disponibilidad (estilista_id, dia_semana, hora_inicio, hora_fin)
-SELECT e.id, 6, '09:00', '14:00'
-FROM estilistas e
-WHERE e.nombre = 'Marc' AND e.apellido = 'Laurent';
-
--- Elena Russo: Mar-Sab 10:00-19:00
-INSERT INTO disponibilidad (estilista_id, dia_semana, hora_inicio, hora_fin)
-SELECT e.id, dias.dia, '10:00', '19:00'
-FROM estilistas e,
-     (VALUES (2),(3),(4),(5),(6)) AS dias(dia)
-WHERE e.nombre = 'Elena' AND e.apellido = 'Russo';
-
--- Julian Vance: Lun-Sab 09:00-17:00
-INSERT INTO disponibilidad (estilista_id, dia_semana, hora_inicio, hora_fin)
-SELECT e.id, dias.dia, '09:00', '17:00'
-FROM estilistas e,
-     (VALUES (1),(2),(3),(4),(5),(6)) AS dias(dia)
-WHERE e.nombre = 'Julian' AND e.apellido = 'Vance';
-
--- Sofia Chen: Mié-Dom 10:00-18:00
-INSERT INTO disponibilidad (estilista_id, dia_semana, hora_inicio, hora_fin)
-SELECT e.id, dias.dia, '10:00', '18:00'
-FROM estilistas e,
-     (VALUES (3),(4),(5),(6),(0)) AS dias(dia)
-WHERE e.nombre = 'Sofia' AND e.apellido = 'Chen';
+-- Valentina Morales: Manicura Rusa & Esmaltado Permanente
+INSERT INTO estilista_servicio (estilista_id, servicio_id)
+SELECT e.id, s.id
+FROM estilistas e, servicios s
+WHERE e.nombre = 'Valentina' AND e.apellido = 'Morales'
+  AND s.nombre IN ('Manicura Rusa & Esmaltado Permanente');

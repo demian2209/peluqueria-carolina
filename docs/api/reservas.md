@@ -21,8 +21,8 @@ Base URL: `/api/v1/reservas`
   "cliente_nombre": "Carolina Gómez",
   "cliente_email": "carolina@example.com",
   "cliente_telefono": "+56912345678",
-  "estilista_id": "e1-marc-laurent",
-  "servicio_id": "s2-corte-autor",
+  "estilista_id": "e1-carolina-valenzuela",
+  "servicio_id": "s4-balayage",
   "fecha": "2026-09-01",
   "hora_inicio": "11:00",
   "notas": "Preferencia por tono natural"
@@ -40,13 +40,13 @@ Base URL: `/api/v1/reservas`
     "cliente_nombre": "Carolina Gómez",
     "cliente_email": "carolina@example.com",
     "cliente_telefono": "+56912345678",
-    "estilista_id": "e1-marc-laurent",
-    "servicio_id": "s2-corte-autor",
+    "estilista_id": "e1-carolina-valenzuela",
+    "servicio_id": "s4-balayage",
     "fecha": "2026-09-01",
     "hora_inicio": "11:00",
-    "hora_fin": "11:45",
+    "hora_fin": "14:00",
     "estado": "pendiente",
-    "precio_final": 45.00,
+    "precio_final": 85000.00,
     "notas": "Preferencia por tono natural",
     "created_at": "2026-08-25T21:57:53.123Z"
   }

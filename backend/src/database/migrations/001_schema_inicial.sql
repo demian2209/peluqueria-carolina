@@ -11,15 +11,21 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Catálogo de servicios ofrecidos por el salón
 -- ==========================================
 CREATE TABLE IF NOT EXISTS servicios (
-    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    nombre      VARCHAR(100) NOT NULL,
-    descripcion TEXT,
+    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nombre       VARCHAR(100) NOT NULL,
+    descripcion  TEXT,
     duracion_min INT NOT NULL CHECK (duracion_min > 0),
-    precio      NUMERIC(10, 2) NOT NULL CHECK (precio >= 0),
-    categoria   VARCHAR(50) NOT NULL,
-    activo      BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    precio       NUMERIC(10, 2) NOT NULL CHECK (precio >= 0),
+    categoria    VARCHAR(50) NOT NULL,
+    activo       BOOLEAN NOT NULL DEFAULT TRUE,
+    en_seleccion BOOLEAN NOT NULL DEFAULT TRUE,
+    orden        INT NOT NULL DEFAULT 0,
+    imagen_url   TEXT,
+    etiqueta     VARCHAR(120),
+    icono        VARCHAR(60) DEFAULT 'auto_awesome',
+    destacado    BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 COMMENT ON TABLE servicios IS 'Catálogo de servicios ofrecidos por Peluquería Carolina';
@@ -95,6 +101,7 @@ COMMENT ON TABLE clientes IS 'Datos de clientes del salón';
 -- ==========================================
 CREATE TABLE IF NOT EXISTS reservas (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    codigo_reserva  VARCHAR(32) UNIQUE,
     cliente_id      UUID NOT NULL REFERENCES clientes(id) ON DELETE RESTRICT,
     estilista_id    UUID NOT NULL REFERENCES estilistas(id) ON DELETE RESTRICT,
     servicio_id     UUID NOT NULL REFERENCES servicios(id) ON DELETE RESTRICT,

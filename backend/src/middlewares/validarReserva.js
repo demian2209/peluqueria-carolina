@@ -15,11 +15,11 @@ const validarReserva = (req, res, next) => {
     errores.push('cliente_email debe ser una dirección de correo válida.');
   }
 
-  if (!estilista_id || typeof estilista_id !== 'string') {
+  if (estilista_id === undefined || estilista_id === null || (typeof estilista_id !== 'string' && typeof estilista_id !== 'number') || String(estilista_id).trim() === '') {
     errores.push('estilista_id es obligatorio.');
   }
 
-  if (!servicio_id || typeof servicio_id !== 'string') {
+  if (servicio_id === undefined || servicio_id === null || (typeof servicio_id !== 'string' && typeof servicio_id !== 'number') || String(servicio_id).trim() === '') {
     errores.push('servicio_id es obligatorio.');
   }
 
@@ -31,6 +31,14 @@ const validarReserva = (req, res, next) => {
   const timeRegex = /^\d{2}:\d{2}$/;
   if (!hora_inicio || !timeRegex.test(hora_inicio)) {
     errores.push('hora_inicio debe tener el formato HH:MM.');
+  }
+
+  if (req.body.cliente_telefono) {
+    const { normalizarTelefonoChileno } = require('../utils/telefono.utils');
+    const tel = normalizarTelefonoChileno(req.body.cliente_telefono);
+    if (!tel) {
+      errores.push('cliente_telefono no tiene un formato válido (se requiere número chileno de 8 dígitos después de +56 9).');
+    }
   }
 
   if (errores.length > 0) {

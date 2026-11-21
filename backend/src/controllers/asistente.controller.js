@@ -51,12 +51,12 @@ const consultarAsistente = async (req, res, next) => {
     // 2. Resolver URL del Webhook Router de n8n
     const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/pc06-webhook-router';
 
-    // 3. Reenviar consulta a n8n con timeout de seguridad (20s)
+    // 3. Reenviar consulta a n8n con timeout de seguridad (40s para tolerar cold starts de n8n Cloud)
     let respuestaIa = '';
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      const timeoutId = setTimeout(() => controller.abort(), 40000);
 
       const n8nHeaders = {
         'Content-Type': 'application/json',

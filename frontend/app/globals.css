@@ -3378,6 +3378,10 @@ img {
     background: var(--surface-container-low);
     border-color: var(--outline-variant);
     color: var(--on-surface);
+    padding: 0.625rem 0.875rem;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .admin-form-input:focus {
@@ -5842,6 +5846,9 @@ img {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .admin-bloqueos-banner {
@@ -5883,14 +5890,22 @@ img {
     grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
     gap: 1.5rem;
     align-items: start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .admin-bloqueos-card {
-    background: #ffffff;
-    border: 1px solid rgba(28, 25, 23, 0.08);
-    border-radius: 14px;
+    background: var(--surface-container-lowest, #ffffff);
+    border: 1px solid var(--outline-variant, rgba(28, 25, 23, 0.08));
+    border-radius: 0.875rem;
     padding: 1.5rem;
     box-shadow: 0 2px 10px rgba(28, 25, 23, 0.04);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .admin-bloqueos-card-header,
@@ -5900,6 +5915,13 @@ img {
     justify-content: space-between;
     gap: 0.75rem;
     margin-bottom: 1.25rem;
+    min-width: 0;
+}
+
+.admin-bloqueos-card-header > div,
+.admin-bloqueos-list-header > div {
+    min-width: 0;
+    flex: 1;
 }
 
 .admin-bloqueos-card-header {
@@ -5910,6 +5932,7 @@ img {
     color: var(--secondary, #b5895a);
     font-size: 1.65rem;
     margin-top: 2px;
+    flex-shrink: 0;
 }
 
 .admin-bloqueos-card-title {
@@ -5917,24 +5940,37 @@ img {
     font-size: 1.1rem;
     font-weight: 700;
     color: #1c1917;
+    overflow-wrap: break-word;
 }
 
 .admin-bloqueos-card-subtitle {
     margin: 0.25rem 0 0;
     font-size: 0.85rem;
     color: #57534e;
+    overflow-wrap: break-word;
 }
 
 .admin-bloqueos-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.admin-bloqueos-form .admin-form-group {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .admin-bloqueos-fieldset {
     border: none;
     padding: 0;
     margin: 0;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
@@ -5948,20 +5984,26 @@ img {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .admin-bloqueos-schedule-ref-title {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.45rem;
     font-size: 0.82rem;
     font-weight: 600;
     color: #44403c;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .admin-bloqueos-schedule-ref-title .material-symbols-outlined {
     font-size: 1rem;
     color: var(--secondary, #b5895a);
+    flex-shrink: 0;
+    margin-top: 0.1rem;
 }
 
 .admin-bloqueos-days-strip {
@@ -5990,8 +6032,10 @@ img {
 
 .admin-bloqueos-segmented {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
 }
 
 .admin-bloqueos-seg-btn {
@@ -6008,10 +6052,13 @@ img {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
+    min-width: 0;
+    text-align: center;
 }
 
 .admin-bloqueos-seg-btn .material-symbols-outlined {
     font-size: 1.05rem;
+    flex-shrink: 0;
 }
 
 .admin-bloqueos-seg-btn.is-active {
@@ -6024,6 +6071,8 @@ img {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 0.35rem;
+    width: 100%;
+    min-width: 0;
 }
 
 .admin-bloqueos-weekday-btn {
@@ -6039,6 +6088,7 @@ img {
     cursor: pointer;
     font-size: 0.72rem;
     transition: all 0.15s ease;
+    min-width: 0;
 }
 
 .admin-bloqueos-weekday-btn strong {
@@ -6064,18 +6114,21 @@ img {
 
 .admin-bloqueos-checkbox-label {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.55rem;
     font-size: 0.88rem;
     font-weight: 600;
     color: #292524;
     cursor: pointer;
+    min-width: 0;
 }
 
 .admin-bloqueos-checkbox-label input {
     width: 17px;
     height: 17px;
     accent-color: #1c1917;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
 }
 
 .admin-bloqueos-time-box {
@@ -6086,12 +6139,15 @@ img {
     border-radius: 10px;
     background: #fafaf9;
     border: 1px solid rgba(28, 25, 23, 0.08);
+    min-width: 0;
+    max-width: 100%;
 }
 
 .admin-bloqueos-time-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
+    min-width: 0;
 }
 
 .admin-bloqueos-presets {
@@ -6157,6 +6213,15 @@ img {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.65rem;
     margin-bottom: 1.15rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.admin-bloqueos-filters .admin-form-input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
 }
 
 .admin-bloqueos-empty {
@@ -6341,13 +6406,28 @@ img {
 
 @media (max-width: 1024px) {
     .admin-bloqueos-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .admin-bloqueos-card {
+        padding: 1rem;
+    }
+
+    .admin-bloqueos-list-header {
+        flex-wrap: wrap;
+    }
+
+    .admin-bloqueos-seg-btn {
+        padding: 0.55rem 0.5rem;
+        font-size: 0.8rem;
     }
 }
 
 @media (max-width: 640px) {
     .admin-bloqueos-filters {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .admin-bloqueo-item {
@@ -6358,10 +6438,18 @@ img {
     .admin-bloqueo-item-actions {
         width: 100%;
         justify-content: flex-end;
+        flex-wrap: wrap;
     }
 
     .admin-bloqueos-weekday-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 420px) {
+    .admin-bloqueos-segmented,
+    .admin-bloqueos-time-row {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -6498,56 +6586,36 @@ img {
     overflow: hidden;
 }
 
-/* Responsivo tabla de Equipo en móviles */
-@media (max-width: 768px) {
-    .admin-equipo-table thead {
-        display: none;
-    }
-
-    .admin-equipo-table tbody {
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
-        padding: 0.75rem;
-    }
-
+/* Adaptación móvil/tablet para la tabla de Equipo */
+@media (max-width: 1023px) {
     .admin-equipo-table tr {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
-        padding: 1rem;
-        border: 1px solid var(--outline-variant);
-        border-radius: 12px;
-        background: var(--surface-container-lowest);
+        grid-template-areas:
+            "orden       orden"
+            "profesional profesional"
+            "nivel       visibilidad"
+            "acciones    acciones";
     }
 
-    .admin-equipo-table td {
-        padding: 0;
-        border: none;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .admin-equipo-table td::before {
-        content: attr(data-label);
-        font-size: 0.68rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--on-surface-variant);
+    .admin-equipo-table td:nth-child(1) {
+        grid-area: orden;
     }
 
     .admin-equipo-table td:nth-child(2) {
-        grid-column: 1 / -1;
+        grid-area: profesional;
+    }
+
+    .admin-equipo-table td:nth-child(3) {
+        grid-area: nivel;
+        align-items: flex-start;
+    }
+
+    .admin-equipo-table td:nth-child(4) {
+        grid-area: visibilidad;
+        align-items: flex-start;
     }
 
     .admin-equipo-table td:nth-child(5) {
-        grid-column: 1 / -1;
-    }
-
-    .admin-equipo-table td:nth-child(5) .admin-actions {
-        justify-content: flex-end;
+        grid-area: acciones;
     }
 }
 

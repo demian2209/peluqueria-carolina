@@ -109,32 +109,6 @@ export default function AdminDashboard({ user, onLogout }) {
               {activeTab === 'encuestas' && 'Resultados, calificaciones y comentarios de las encuestas de satisfacción post-atención'}
             </p>
           </div>
-          <a
-            href={
-              activeTab === 'horarios'
-                ? '/#reservar'
-                : activeTab === 'estilistas'
-                ? '/#estilistas'
-                : activeTab === 'encuestas'
-                ? '/#testimonios'
-                : '/#servicios'
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-            className="admin-btn admin-btn--ghost"
-            title={
-              activeTab === 'horarios'
-                ? 'Ver formulario de reservas en sitio público'
-                : activeTab === 'estilistas'
-                ? 'Ver sección Maestros de la Tijera & Color en sitio público'
-                : activeTab === 'encuestas'
-                ? 'Ver sección de Testimonios en sitio público'
-                : 'Ver sección Nuestra Selección en sitio público'
-            }
-          >
-            <span className="material-symbols-outlined">open_in_new</span>
-            <span>Ver Sitio Público</span>
-          </a>
         </header>
 
         <div className="admin-content">

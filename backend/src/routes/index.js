@@ -9,6 +9,8 @@ const reservasRoutes = require('./reservas.routes');
 const encuestasRoutes = require('./encuestas.routes');
 const authRoutes = require('./auth.routes');
 const asistenteRoutes = require('./asistente.routes');
+const chatbotRoutes = require('./chatbot.routes');
+const kpisRoutes = require('./kpis.routes');
 
 router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);
@@ -19,6 +21,8 @@ router.use('/bloqueos', bloqueosRoutes);
 router.use('/reservas', reservasRoutes);
 router.use('/encuestas', encuestasRoutes);
 router.use('/asistente', asistenteRoutes);
+router.use('/chatbot', chatbotRoutes);
+router.use('/kpis', kpisRoutes);
 
 module.exports = router;
 

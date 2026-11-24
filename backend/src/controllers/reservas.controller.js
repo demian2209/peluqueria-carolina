@@ -707,19 +707,27 @@ const formatearReservaParaRespuesta = (r) => {
 /**
  * Listar reservas
  * GET /api/v1/reservas
- * Query: estilista_id, fecha, estado, codigo_reserva
+ * Query: estilista_id, fecha, fecha_desde, fecha_hasta, estado, codigo_reserva
  */
 const getReservas = async (req, res, next) => {
   try {
-    const { estilista_id, fecha, estado, codigo_reserva } = req.query;
+    const { estilista_id, fecha, fecha_desde, fecha_hasta, estado, codigo_reserva } = req.query;
+    const isIsoDate = (val) => typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val.trim());
+
+    const fechaExacta = isIsoDate(fecha) ? fecha.trim() : null;
+    const desde = isIsoDate(fecha_desde) ? fecha_desde.trim() : null;
+    const hasta = isIsoDate(fecha_hasta) ? fecha_hasta.trim() : null;
 
     if (supabase) {
       let q = supabase
         .from('reservas')
         .select('*, clientes(nombre_completo, email, telefono_whatsapp), estilistas(nombre, especialidad), servicios(nombre, precio, duracion_min)');
       if (estilista_id) q = q.eq('estilista_id', isNaN(estilista_id) ? 1 : Number(estilista_id));
-      if (fecha) {
-        q = q.gte('fecha_hora_inicio', `${fecha}T00:00:00-03:00`).lte('fecha_hora_inicio', `${fecha}T23:59:59-03:00`);
+      if (fechaExacta) {
+        q = q.gte('fecha_hora_inicio', `${fechaExacta}T00:00:00-03:00`).lte('fecha_hora_inicio', `${fechaExacta}T23:59:59-03:00`);
+      } else {
+        if (desde) q = q.gte('fecha_hora_inicio', `${desde}T00:00:00-03:00`);
+        if (hasta) q = q.lte('fecha_hora_inicio', `${hasta}T23:59:59-03:00`);
       }
       if (estado) q = q.eq('estado', estado);
 
@@ -739,7 +747,12 @@ const getReservas = async (req, res, next) => {
     // Fallback mock
     let reservas = [...reservasEnMemoria].map(formatearReservaParaRespuesta);
     if (estilista_id) reservas = reservas.filter((r) => r.estilista_id === estilista_id);
-    if (fecha) reservas = reservas.filter((r) => r.fecha === fecha);
+    if (fechaExacta) {
+      reservas = reservas.filter((r) => r.fecha === fechaExacta);
+    } else {
+      if (desde) reservas = reservas.filter((r) => r.fecha && r.fecha >= desde);
+      if (hasta) reservas = reservas.filter((r) => r.fecha && r.fecha <= hasta);
+    }
     if (estado) reservas = reservas.filter((r) => r.estado === estado);
     if (codigo_reserva) {
       const term = String(codigo_reserva).trim().toUpperCase();
@@ -976,7 +989,7 @@ const reprogramarReserva = async (req, res, next) => {
       });
     }
 
-    if (['cancelada', 'atendida'].includes(reserva.estado)) {
+    if (['cancelada', 'atendida', 'completada', 'no_asistio'].includes(reserva.estado)) {
       return res.status(409).json({
         status: 'error',
         message: `No se puede reprogramar una reserva con estado '${reserva.estado}'.`,
@@ -1078,10 +1091,10 @@ const marcarAtendida = async (req, res, next) => {
 
     const targetId = reserva.id;
 
-    if (reserva.estado === 'cancelada') {
+    if (['cancelada', 'no_asistio'].includes(reserva.estado)) {
       return res.status(409).json({
         status: 'error',
-        message: 'No se puede marcar como atendida una reserva cancelada.',
+        message: `No se puede marcar como atendida una reserva con estado '${reserva.estado}'.`,
       });
     }
 
@@ -1116,18 +1129,90 @@ const marcarAtendida = async (req, res, next) => {
 };
 
 /**
+ * Marcar una reserva como "No asistió" (uso admin)
+ * PATCH /api/v1/reservas/:id/no-asistio
+ * Permite registrar inasistencia desde estado 'pendiente' o 'confirmada'.
+ */
+const marcarNoAsistio = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const reserva = await getReservaRawById(id);
+
+    if (!reserva) {
+      return res.status(404).json({ status: 'error', message: `Reserva '${id}' no encontrada.` });
+    }
+
+    const targetId = reserva.id;
+    const codigoActual = resolverCodigoReserva(reserva);
+
+    if (!['pendiente', 'confirmada'].includes(reserva.estado)) {
+      return res.status(409).json({
+        status: 'error',
+        message: `Solo se puede marcar como 'No asistió' una reserva en estado 'pendiente' o 'confirmada'. Estado actual: '${reserva.estado}'.`,
+      });
+    }
+
+    if (supabase) {
+      const { data: updated, error } = await supabase
+        .from('reservas')
+        .update({ estado: 'no_asistio' })
+        .eq('id', targetId)
+        .select('*, clientes(nombre_completo, email, telefono_whatsapp), servicios(nombre, precio, duracion_min), estilistas(nombre, especialidad)')
+        .single();
+
+      if (error) {
+        console.error('[Supabase] Error al marcar reserva como no_asistio:', error);
+        return res.status(500).json({
+          status: 'error',
+          message: 'No se pudo actualizar el estado a "No asistió" en la base de datos. Verifica que la migración 007 haya sido ejecutada.',
+        });
+      }
+
+      if (updated) {
+        const formatted = formatearReservaParaRespuesta({
+          ...updated,
+          codigo_reserva: updated.codigo_reserva || codigoActual,
+        });
+        return res.status(200).json({ status: 'success', data: formatted });
+      }
+    }
+
+    // Fallback mock
+    reservasEnMemoria = reservasEnMemoria.map((r) =>
+      String(r.id) === String(targetId)
+        ? { ...r, estado: 'no_asistio', codigo_reserva: codigoActual }
+        : r
+    );
+    const actualizada = formatearReservaParaRespuesta(
+      reservasEnMemoria.find((r) => String(r.id) === String(targetId))
+    );
+
+    return res.status(200).json({ status: 'success', source: 'mock', data: actualizada });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * Lógica interna para el barrido de citas vencidas.
  * Se invoca tanto desde el controlador HTTP como desde el worker cron en background.
+ * Acota el barrido a una ventana reciente (por defecto últimos 3 días) para no sobrescribir
+ * registros históricos o semillas de meses cerrados.
  */
 const cerrarCitasCumplidasInternal = async () => {
-  const ahoraIso = new Date().toISOString();
+  const ahora = new Date();
+  const ahoraIso = ahora.toISOString();
+  const lookbackDays = Math.max(1, Number(process.env.CRON_LOOKBACK_DAYS) || 3);
+  const ventanaInicio = new Date(ahora.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
+  const ventanaInicioIso = ventanaInicio.toISOString();
   let actualizadas = [];
 
   if (supabase) {
-    // 1. Buscar citas en Supabase cuya hora de fin ya pasó y están confirmadas o pendientes
+    // 1. Buscar citas recientes en Supabase cuya hora de fin ya pasó y están confirmadas o pendientes
     const { data: citas, error: errSearch } = await supabase
       .from('reservas')
       .select('*, clientes(nombre_completo, email, telefono_whatsapp), servicios(nombre), estilistas(nombre)')
+      .gte('fecha_hora_fin', ventanaInicioIso)
       .lte('fecha_hora_fin', ahoraIso)
       .in('estado', ['confirmada', 'pendiente']);
 
@@ -1148,7 +1233,8 @@ const cerrarCitasCumplidasInternal = async () => {
     }
   } else {
     // Fallback Mock
-    const ahoraMs = Date.now();
+    const ahoraMs = ahora.getTime();
+    const ventanaInicioMs = ventanaInicio.getTime();
     reservasEnMemoria = reservasEnMemoria.map((r) => {
       let dFin;
       if (r.fecha_hora_fin) {
@@ -1156,7 +1242,7 @@ const cerrarCitasCumplidasInternal = async () => {
       } else {
         dFin = new Date(`${r.fecha}T${r.hora_fin}:00`).getTime();
       }
-      if (dFin <= ahoraMs && ['confirmada', 'pendiente'].includes(r.estado)) {
+      if (dFin >= ventanaInicioMs && dFin <= ahoraMs && ['confirmada', 'pendiente'].includes(r.estado)) {
         const up = { ...r, estado: 'atendida' };
         despacharEventoN8N('reserva_atendida', up);
         actualizadas.push(up);
@@ -1642,6 +1728,7 @@ module.exports = {
   confirmarReserva,
   reprogramarReserva,
   marcarAtendida,
+  marcarNoAsistio,
   cerrarCitasCumplidas,
   cerrarCitasCumplidasInternal,
   ejecutarRecordatorios24h,

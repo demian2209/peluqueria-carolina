@@ -9,6 +9,7 @@ const {
   confirmarReserva,
   reprogramarReserva,
   marcarAtendida,
+  marcarNoAsistio,
   cerrarCitasCumplidas,
   ejecutarRecordatorios24h,
   verificarWebhookWhatsApp,
@@ -73,6 +74,7 @@ router.patch('/:id/cancelar', gestionReservaLimiter, requireReservaAccess, cance
 router.patch('/:id/confirmar', requireAuth, requireAdmin, confirmarReserva);
 router.patch('/:id/reprogramar', gestionReservaLimiter, requireReservaAccess, reprogramarReserva);
 router.patch('/:id/atendida', requireInternalOrAdmin, marcarAtendida);
+router.patch('/:id/no-asistio', requireAuth, requireAdmin, marcarNoAsistio);
 
 // Tareas automatizadas y barridos programados (Pilar C y D)
 router.post('/cron/cerrar-atendidas', requireInternalOrAdmin, cerrarCitasCumplidas);

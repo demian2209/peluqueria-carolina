@@ -1789,7 +1789,7 @@ export async function enviarConsultaAsistente(mensaje) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ mensaje }),
+        body: JSON.stringify({ mensaje, session_id: obtenerSessionIdChatbot() }),
       },
       35000,
       0
@@ -1808,6 +1808,33 @@ export async function enviarConsultaAsistente(mensaje) {
   } catch (err) {
     console.error('Error al consultar asistente:', err);
     throw err;
+  }
+}
+
+const CHATBOT_SESSION_STORAGE_KEY = 'carolina_chatbot_session_id';
+
+/**
+ * Identificador de sesión del chatbot (persistido en sessionStorage). Agrupa todos los turnos
+ * de una misma visita en una única conversación del historial administrativo.
+ */
+function obtenerSessionIdChatbot() {
+  const generar = () => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return `web-${crypto.randomUUID()}`;
+    }
+    return `web-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  };
+
+  if (typeof window === 'undefined') return generar();
+  try {
+    let id = sessionStorage.getItem(CHATBOT_SESSION_STORAGE_KEY);
+    if (!id || !/^[A-Za-z0-9_-]{8,100}$/.test(id)) {
+      id = generar();
+      sessionStorage.setItem(CHATBOT_SESSION_STORAGE_KEY, id);
+    }
+    return id;
+  } catch (_) {
+    return generar();
   }
 }
 
@@ -2098,3 +2125,96 @@ export async function eliminarEncuestaAdmin(id, headers = {}) {
   }
 }
 
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMINISTRACIÓN — HISTORIAL DEL CHATBOT IA (FASE 4)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Lista las conversaciones del chatbot con filtros multicategoría (AND / OR),
+ * franja horaria, rango de fechas y búsqueda de texto.
+ */
+export async function getConversacionesChatbotAdmin(filtros = {}, headers = {}) {
+  const params = new URLSearchParams();
+  if (Array.isArray(filtros.categorias) && filtros.categorias.length > 0) {
+    params.set('categorias', filtros.categorias.join(','));
+  }
+  if (filtros.modo_categorias) params.set('modo_categorias', filtros.modo_categorias);
+  if (filtros.fuera_horario !== undefined && filtros.fuera_horario !== '') {
+    params.set('fuera_horario', String(filtros.fuera_horario));
+  }
+  if (filtros.fecha_desde) params.set('fecha_desde', filtros.fecha_desde);
+  if (filtros.fecha_hasta) params.set('fecha_hasta', filtros.fecha_hasta);
+  if (filtros.busqueda) params.set('busqueda', filtros.busqueda);
+
+  const qs = params.toString();
+  const res = await fetchWithTimeout(
+    `${getBaseUrl()}/chatbot/conversaciones${qs ? `?${qs}` : ''}`,
+    {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { ...headers },
+    },
+    10000,
+    1
+  );
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json.message || 'Error al cargar el historial del chatbot');
+  }
+  return json;
+}
+
+/**
+ * Obtiene el detalle completo de una conversación (cabecera + todos sus mensajes).
+ */
+export async function getConversacionChatbotDetalleAdmin(id, headers = {}) {
+  const res = await fetchWithTimeout(
+    `${getBaseUrl()}/chatbot/conversaciones/${encodeURIComponent(id)}`,
+    {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { ...headers },
+    },
+    10000,
+    1
+  );
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json.message || 'Error al cargar el detalle de la conversación');
+  }
+  return json;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMINISTRACIÓN — MÓDULO DE KPIs Y ANALÍTICA (FASE 5)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Obtiene el resumen de KPIs (confirmaciones, inasistencias mensual/semanal/diaria
+ * y rendimiento del chatbot fuera de horario laboral).
+ */
+export async function getKpisResumenAdmin({ fecha_desde = '', fecha_hasta = '' } = {}, headers = {}) {
+  const params = new URLSearchParams();
+  if (fecha_desde) params.set('fecha_desde', fecha_desde);
+  if (fecha_hasta) params.set('fecha_hasta', fecha_hasta);
+  const qs = params.toString();
+
+  const res = await fetchWithTimeout(
+    `${getBaseUrl()}/kpis/resumen${qs ? `?${qs}` : ''}`,
+    {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { ...headers },
+    },
+    10000,
+    1
+  );
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json.message || 'Error al cargar los KPIs');
+  }
+  return json;
+}

@@ -135,3 +135,21 @@ pendiente â†’ confirmada â†’ completada
 | `reservas`          | Solo las del usuario | Solo el propio usuario |
 
 > **Nota:** Las polÃ­ticas RLS de `clientes` y `reservas` se activan completamente en **Fase 8** cuando se integra Supabase Auth.
+
+---
+
+## Historial del Chatbot y Horario de Negocio (migración 008)
+
+| Tabla | Descripción |
+|-------|-------------|
+| `configuracion_horario_negocio` | Horario laboral por día (0=Dom..6=Sáb, America/Santiago). Inicial: Lun–Sáb 09:00–19:00, Dom 10:00–18:00 (unión de jornadas de los estilistas) |
+| `chatbot_conversaciones` | 1 fila por sesión (`session_id` único). `categorias text[]` con índice GIN; `fuera_horario_laboral` evaluado al inicio |
+| `chatbot_mensajes` | Mensajes `usuario`/`asistente` con `creado_en timestamptz` exacto y flag fuera de horario |
+
+**Categorías (catálogo cerrado):** `servicios`, `precios`, `horarios`, `estilistas`, `reservar_hora`, `cancelar_reprogramar`, `ubicacion_contacto`, `faqs`, `otros`.
+
+**Escritura:** RPC `registrar_interaccion_chatbot(...)` (upsert de conversación + unión de categorías + 2 mensajes, atómico), invocada por n8n (PC07). Acceso solo `service_role` (RLS sin políticas públicas).
+
+**Filtros multicategoría:** `categorias @> ARRAY['precios','horarios']` (contiene TODAS) y `categorias && ARRAY[...]` (contiene ALGUNA).
+
+`reservas.estado` acepta: `pendiente`, `confirmada`, `atendida`, `completada`, `cancelada`, `no_asistio` (migración 007).

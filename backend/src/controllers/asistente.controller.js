@@ -5,7 +5,7 @@ const {
   CATEGORIAS_CHATBOT,
   normalizarCategorias,
   resolverSessionId,
-  despacharRegistroInteraccion,
+  registrarInteraccionChatbot,
 } = require('../services/chatbot.service');
 
 /**
@@ -332,16 +332,20 @@ const consultarAsistente = async (req, res, next) => {
       try {
         const respuestaDirecta = await consultarGeminiDirecto(mensajeLimpio);
         if (respuestaDirecta) {
-          // Persistencia asíncrona (fire-and-forget): n8n clasifica y guarda en Supabase sin demorar al cliente
-          despacharRegistroInteraccion({
-            session_id: sessionId,
-            mensaje: mensajeLimpio,
-            respuesta: respuestaDirecta.respuesta,
-            categorias: respuestaDirecta.categorias,
-            canal: 'web',
-            origen: 'gemini_direct',
-            timestamp: recibidoEn,
-          });
+          // Persistir directamente en Supabase antes de responder para reflejarse de inmediato en el Panel Admin
+          try {
+            await registrarInteraccionChatbot({
+              session_id: sessionId,
+              mensaje: mensajeLimpio,
+              respuesta: respuestaDirecta.respuesta,
+              categorias: respuestaDirecta.categorias,
+              canal: 'web',
+              origen: 'gemini_direct',
+              timestamp: recibidoEn,
+            });
+          } catch (persistErr) {
+            console.warn('[Asistente IA] Error inesperado persistiendo conversación:', persistErr.message);
+          }
           return res.status(200).json({
             status: 'success',
             source: 'gemini_direct',

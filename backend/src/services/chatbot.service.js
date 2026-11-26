@@ -6,9 +6,8 @@ const supabase = require('../database/supabaseClient');
  *
  * - Catálogo cerrado de categorías (espejo de public.chatbot_categorias_validas() en Supabase).
  * - Clasificador heurístico de respaldo por palabras clave (espejo del nodo "Clasificar Categorías" de n8n).
- * - Despacho asíncrono (fire-and-forget) del evento `registrar_interaccion_chat` hacia n8n (PC07),
- *   que clasifica, valida y persiste la interacción en Supabase mediante la RPC
- *   `registrar_interaccion_chatbot`.
+ * - Persistencia directa y atómica en Supabase mediante la RPC `registrar_interaccion_chatbot`
+ *   (usando service_role), con respaldo por tablas directas, webhook n8n (PC07) y memoria en modo mock.
  */
 
 const CATEGORIAS_CHATBOT = [
@@ -96,23 +95,242 @@ const resolverUrlRegistroChat = () => {
   return url.includes('/webhook/pc07-registrar-chat') ? url : null;
 };
 
+const HORARIO_NEGOCIO_DEFAULT = {
+  0: { abierto: true, apertura: 10 * 60, cierre: 18 * 60 }, // Domingo 10:00–18:00
+  1: { abierto: true, apertura: 9 * 60, cierre: 19 * 60 },  // Lunes
+  2: { abierto: true, apertura: 9 * 60, cierre: 19 * 60 },  // Martes
+  3: { abierto: true, apertura: 9 * 60, cierre: 19 * 60 },  // Miércoles
+  4: { abierto: true, apertura: 9 * 60, cierre: 19 * 60 },  // Jueves
+  5: { abierto: true, apertura: 9 * 60, cierre: 19 * 60 },  // Viernes
+  6: { abierto: true, apertura: 9 * 60, cierre: 19 * 60 },  // Sábado
+};
+
 /**
- * Despacha en segundo plano la interacción hacia n8n. Nunca lanza ni bloquea la respuesta al cliente.
+ * Evalúa si un timestamp ISO cae fuera del horario laboral en America/Santiago.
+ * Espejo de public.es_fuera_horario_laboral() para respaldos directos / modo mock.
  */
-const despacharRegistroInteraccion = ({
+const esFueraHorarioLaboralChile = (isoTimestamp) => {
+  const dt = new Date(isoTimestamp || Date.now());
+  if (isNaN(dt.getTime())) return false;
+  try {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Santiago',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+        .formatToParts(dt)
+        .map((p) => [p.type, p.value])
+    );
+    const dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const dow = dowMap[parts.weekday] ?? 1;
+    const cfg = HORARIO_NEGOCIO_DEFAULT[dow];
+    if (!cfg || !cfg.abierto) return true;
+    const mins = (Number(parts.hour) % 24) * 60 + Number(parts.minute || 0);
+    return !(mins >= cfg.apertura && mins < cfg.cierre);
+  } catch (_) {
+    return false;
+  }
+};
+
+// Store en memoria solo para entornos sin Supabase configurado (modo mock)
+const conversacionesMockMap = new Map();
+let mockMsgSeq = 1;
+
+const registrarInteraccionEnMemoria = ({
   session_id,
   mensaje,
   respuesta,
-  categorias = [],
-  canal = 'web',
-  origen = 'gemini_direct',
-  timestamp = new Date().toISOString(),
+  categorias,
+  canal,
+  origen,
+  timestamp,
+}) => {
+  const fuera = esFueraHorarioLaboralChile(timestamp);
+  const tsBot = new Date(new Date(timestamp).getTime() + 1).toISOString();
+  let conv = conversacionesMockMap.get(session_id);
+
+  if (!conv) {
+    conv = {
+      id: crypto.randomUUID(),
+      session_id,
+      canal,
+      categorias: [...categorias],
+      total_mensajes: 2,
+      fuera_horario_laboral: fuera,
+      iniciada_en: timestamp,
+      ultima_interaccion_en: timestamp,
+      resumen: mensaje.slice(0, 160),
+      metadata: {},
+      mensajes: [],
+    };
+    conversacionesMockMap.set(session_id, conv);
+  } else {
+    conv.categorias = normalizarCategorias([...conv.categorias, ...categorias]);
+    conv.total_mensajes += 2;
+    if (timestamp > conv.ultima_interaccion_en) {
+      conv.ultima_interaccion_en = timestamp;
+    }
+  }
+
+  conv.mensajes.push(
+    {
+      id: mockMsgSeq++,
+      conversacion_id: conv.id,
+      rol: 'usuario',
+      contenido: mensaje,
+      categorias_detectadas: [...categorias],
+      fuera_horario_laboral: fuera,
+      origen,
+      creado_en: timestamp,
+    },
+    {
+      id: mockMsgSeq++,
+      conversacion_id: conv.id,
+      rol: 'asistente',
+      contenido: respuesta,
+      categorias_detectadas: [],
+      fuera_horario_laboral: fuera,
+      origen,
+      creado_en: tsBot,
+    }
+  );
+
+  return {
+    conversacion_id: conv.id,
+    categorias: conv.categorias,
+    fuera_horario_laboral: fuera,
+    conversacion_fuera_horario_laboral: conv.fuera_horario_laboral,
+  };
+};
+
+const esErrorRpcInexistente = (error) => {
+  if (!error) return false;
+  const code = String(error.code || '');
+  const msg = String(error.message || '').toLowerCase();
+  return (
+    code === '42883' ||
+    code === 'PGRST202' ||
+    msg.includes('could not find the function') ||
+    (msg.includes('function') && msg.includes('does not exist'))
+  );
+};
+
+/**
+ * Fallback directo sobre tablas si la RPC `registrar_interaccion_chatbot` no estuviera disponible.
+ */
+const registrarInteraccionTablasDirecto = async ({
+  session_id,
+  mensaje,
+  respuesta,
+  categorias,
+  canal,
+  origen,
+  timestamp,
+}) => {
+  const fuera = esFueraHorarioLaboralChile(timestamp);
+  const tsBot = new Date(new Date(timestamp).getTime() + 1).toISOString();
+
+  const { data: existente, error: selErr } = await supabase
+    .from('chatbot_conversaciones')
+    .select('id, categorias, total_mensajes, fuera_horario_laboral, ultima_interaccion_en')
+    .eq('session_id', session_id)
+    .maybeSingle();
+
+  if (selErr) throw selErr;
+
+  let convId;
+  let catsFinales = categorias;
+  let fueraConv = fuera;
+
+  if (!existente) {
+    const { data: inserted, error: insErr } = await supabase
+      .from('chatbot_conversaciones')
+      .insert({
+        session_id,
+        canal,
+        categorias,
+        total_mensajes: 2,
+        fuera_horario_laboral: fuera,
+        iniciada_en: timestamp,
+        ultima_interaccion_en: timestamp,
+        resumen: mensaje.slice(0, 160),
+      })
+      .select('id, categorias, fuera_horario_laboral')
+      .single();
+
+    if (insErr) throw insErr;
+    convId = inserted.id;
+    catsFinales = inserted.categorias;
+    fueraConv = inserted.fuera_horario_laboral;
+  } else {
+    catsFinales = normalizarCategorias([...(existente.categorias || []), ...categorias]);
+    const nuevaUltima =
+      existente.ultima_interaccion_en && existente.ultima_interaccion_en > timestamp
+        ? existente.ultima_interaccion_en
+        : timestamp;
+
+    const { error: updErr } = await supabase
+      .from('chatbot_conversaciones')
+      .update({
+        categorias: catsFinales,
+        total_mensajes: Number(existente.total_mensajes || 0) + 2,
+        ultima_interaccion_en: nuevaUltima,
+      })
+      .eq('id', existente.id);
+
+    if (updErr) throw updErr;
+    convId = existente.id;
+    fueraConv = Boolean(existente.fuera_horario_laboral);
+  }
+
+  const { error: msgErr } = await supabase.from('chatbot_mensajes').insert([
+    {
+      conversacion_id: convId,
+      rol: 'usuario',
+      contenido: mensaje,
+      categorias_detectadas: categorias,
+      fuera_horario_laboral: fuera,
+      origen,
+      creado_en: timestamp,
+    },
+    {
+      conversacion_id: convId,
+      rol: 'asistente',
+      contenido: respuesta,
+      categorias_detectadas: [],
+      fuera_horario_laboral: fuera,
+      origen,
+      creado_en: tsBot,
+    },
+  ]);
+
+  if (msgErr) throw msgErr;
+
+  return {
+    conversacion_id: convId,
+    categorias: catsFinales,
+    fuera_horario_laboral: fuera,
+    conversacion_fuera_horario_laboral: fueraConv,
+  };
+};
+
+/**
+ * Despacha en segundo plano la interacción hacia el webhook n8n como respaldo secundario.
+ */
+const despacharRegistroInteraccionN8n = ({
+  session_id,
+  mensaje,
+  respuesta,
+  categorias,
+  canal,
+  origen,
+  timestamp,
 }) => {
   const url = resolverUrlRegistroChat();
-  if (!url) {
-    console.warn('[Chatbot] No se pudo derivar la URL de registro de chat; interacción no persistida.');
-    return;
-  }
+  if (!url) return;
 
   const headers = { 'Content-Type': 'application/json' };
   if (process.env.INTERNAL_API_KEY) headers['x-api-key'] = process.env.INTERNAL_API_KEY;
@@ -129,7 +347,7 @@ const despacharRegistroInteraccion = ({
       session_id,
       mensaje,
       respuesta,
-      categorias: normalizarCategorias(categorias, mensaje),
+      categorias,
       canal,
       origen,
       timestamp,
@@ -145,6 +363,93 @@ const despacharRegistroInteraccion = ({
       console.warn(`[Chatbot] No se pudo registrar la interacción en n8n: ${err.message}`);
     })
     .finally(() => clearTimeout(timer));
+};
+
+/**
+ * Persiste una interacción (mensaje del usuario + respuesta del asistente) directamente en Supabase
+ * usando la RPC atómica `registrar_interaccion_chatbot`. Nunca lanza excepción hacia el cliente.
+ * Si Supabase no está disponible, usa respaldo en memoria (modo mock) o webhook n8n.
+ */
+const registrarInteraccionChatbot = async ({
+  session_id,
+  mensaje,
+  respuesta,
+  categorias = [],
+  canal = 'web',
+  origen = 'gemini_direct',
+  timestamp = new Date().toISOString(),
+} = {}) => {
+  const sessionLimpia = resolverSessionId(session_id);
+  const mensajeLimpio = String(mensaje || '').trim().slice(0, 2000);
+  const respuestaLimpia = String(respuesta || '').trim().slice(0, 4000);
+
+  if (!mensajeLimpio || !respuestaLimpia) {
+    return { ok: false, source: 'invalid_payload' };
+  }
+
+  const canalValido = canal === 'whatsapp' ? 'whatsapp' : 'web';
+  const origenValido = ['n8n', 'gemini_direct', 'sistema'].includes(origen) ? origen : 'gemini_direct';
+  const parsedDate = new Date(timestamp);
+  const tsValido = isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString();
+  const catsNormalizadas = normalizarCategorias(categorias, mensajeLimpio);
+
+  const payload = {
+    session_id: sessionLimpia,
+    mensaje: mensajeLimpio,
+    respuesta: respuestaLimpia,
+    categorias: catsNormalizadas,
+    canal: canalValido,
+    origen: origenValido,
+    timestamp: tsValido,
+  };
+
+  if (!supabase) {
+    const data = registrarInteraccionEnMemoria(payload);
+    return { ok: true, source: 'mock', data };
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('registrar_interaccion_chatbot', {
+      p_session_id: sessionLimpia,
+      p_mensaje_usuario: mensajeLimpio,
+      p_respuesta_bot: respuestaLimpia,
+      p_categorias: catsNormalizadas,
+      p_canal: canalValido,
+      p_origen: origenValido,
+      p_timestamp: tsValido,
+    });
+
+    if (!error) {
+      return { ok: true, source: 'supabase_rpc', data };
+    }
+
+    if (esErrorRpcInexistente(error)) {
+      const dataDirect = await registrarInteraccionTablasDirecto(payload);
+      return { ok: true, source: 'supabase_direct', data: dataDirect };
+    }
+
+    if (esErrorTablaInexistente(error)) {
+      console.warn(
+        '[Chatbot] La tabla/RPC de historial aún no existe en Supabase. Ejecuta la migración 008.'
+      );
+      return { ok: false, source: 'supabase_unmigrated', error: error.message };
+    }
+
+    throw error;
+  } catch (err) {
+    console.warn(`[Chatbot] Error persistiendo interacción en Supabase (${err.message}); intentando respaldo n8n.`);
+    despacharRegistroInteraccionN8n(payload);
+    return { ok: false, source: 'n8n_fallback', error: err.message };
+  }
+};
+
+/**
+ * Alias retrocompatible (fire-and-forget seguro).
+ */
+const despacharRegistroInteraccion = (params) => {
+  registrarInteraccionChatbot(params).catch((err) => {
+    console.warn(`[Chatbot] Error inesperado registrando interacción: ${err.message}`);
+  });
 };
 
 const CATEGORIAS_CATALOGO_META = [
@@ -237,11 +542,55 @@ const listarConversacionesChatbot = async ({
   const maxRows = Math.min(250, Math.max(1, Number(limit) || 100));
 
   if (!supabase) {
+    let rows = [...conversacionesMockMap.values()].map(({ mensajes: _m, ...cabecera }) => cabecera);
+
+    if (catsFiltro.length > 0) {
+      rows = rows.filter((c) => {
+        const cats = Array.isArray(c.categorias) ? c.categorias : [];
+        return modo === 'OR'
+          ? catsFiltro.some((f) => cats.includes(f))
+          : catsFiltro.every((f) => cats.includes(f));
+      });
+    }
+
+    if (fuera_horario === 'true' || fuera_horario === true) {
+      rows = rows.filter((c) => Boolean(c.fuera_horario_laboral));
+    } else if (fuera_horario === 'false' || fuera_horario === false) {
+      rows = rows.filter((c) => !c.fuera_horario_laboral);
+    }
+
+    if (desde) {
+      const desdeMs = Date.parse(`${desde}T00:00:00-03:00`);
+      rows = rows.filter((c) => Date.parse(c.iniciada_en) >= desdeMs);
+    }
+    if (hasta) {
+      const hastaMs = Date.parse(`${hasta}T23:59:59-03:00`);
+      rows = rows.filter((c) => Date.parse(c.iniciada_en) <= hastaMs);
+    }
+
+    if (searchTerm) {
+      const qLower = searchTerm.toLowerCase();
+      rows = rows.filter((c) => {
+        const full = conversacionesMockMap.get(c.session_id);
+        const matchMsg = (full?.mensajes || []).some((m) =>
+          String(m.contenido || '').toLowerCase().includes(qLower)
+        );
+        return (
+          matchMsg ||
+          String(c.resumen || '').toLowerCase().includes(qLower) ||
+          String(c.session_id || '').toLowerCase().includes(qLower)
+        );
+      });
+    }
+
+    rows.sort((a, b) => String(b.ultima_interaccion_en).localeCompare(String(a.ultima_interaccion_en)));
+    rows = rows.slice(0, maxRows);
+
     return {
-      items: [],
-      stats: calcularEstadisticasConversaciones([]),
+      items: rows,
+      stats: calcularEstadisticasConversaciones(rows),
       source: 'mock',
-      warning: 'Supabase no está configurado en el servidor.',
+      warning: 'Supabase no está configurado en el servidor (mostrando historial en memoria local).',
     };
   }
 
@@ -335,7 +684,17 @@ const obtenerConversacionConMensajes = async (idOrSession) => {
   if (!idOrSession) return null;
   const target = String(idOrSession).trim();
 
-  if (!supabase) return null;
+  if (!supabase) {
+    for (const conv of conversacionesMockMap.values()) {
+      if (conv.id === target || conv.session_id === target) {
+        return {
+          ...conv,
+          mensajes: [...(conv.mensajes || [])],
+        };
+      }
+    }
+    return null;
+  }
 
   const isUuid = UUID_REGEX.test(target);
   const { data: conv, error: convErr } = await supabase
@@ -376,6 +735,7 @@ module.exports = {
   parsearCategoriasFiltro,
   resolverSessionId,
   resolverUrlRegistroChat,
+  registrarInteraccionChatbot,
   despacharRegistroInteraccion,
   listarConversacionesChatbot,
   obtenerConversacionConMensajes,

@@ -1872,7 +1872,9 @@ export async function enviarConsultaAsistente(mensaje) {
       throw new Error(json.message || 'Error al comunicarse con el asistente');
     }
 
-    return json.data?.respuesta || json.respuesta || 'No se obtuvo respuesta del asistente.';
+    const respuesta = json.data?.respuesta || json.respuesta || 'No se obtuvo respuesta del asistente.';
+    notificarActualizacionChatbot();
+    return respuesta;
   } catch (err) {
     console.error('Error al consultar asistente:', err);
     throw err;
@@ -2198,6 +2200,97 @@ export async function eliminarEncuestaAdmin(id, headers = {}) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ADMINISTRACIÓN — HISTORIAL DEL CHATBOT IA (FASE 4)
 // ─────────────────────────────────────────────────────────────────────────────
+
+const CHATBOT_SYNC_CHANNEL = 'carolina_chatbot_sync';
+const CHATBOT_STORAGE_KEY = 'carolina_chatbot_updated_at';
+
+/**
+ * Emite una señal de sincronización cuando se registra una nueva interacción con el chatbot.
+ */
+export function notificarActualizacionChatbot() {
+  if (typeof window === 'undefined') return;
+  const ts = String(Date.now());
+  try {
+    localStorage.setItem(CHATBOT_STORAGE_KEY, ts);
+  } catch (_) {}
+
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const bc = new BroadcastChannel(CHATBOT_SYNC_CHANNEL);
+      bc.postMessage({ type: 'CHATBOT_UPDATED', timestamp: ts });
+      bc.close();
+    }
+  } catch (_) {}
+
+  window.dispatchEvent(new CustomEvent('chatbotHistorialActualizado', { detail: ts }));
+}
+
+/**
+ * Suscribe el panel administrativo (AdminChatbotList) a nuevas conversaciones del chatbot.
+ */
+export function suscribirActualizacionChatbot(onUpdate) {
+  if (typeof window === 'undefined' || typeof onUpdate !== 'function') {
+    return () => {};
+  }
+
+  let debounceTimer = null;
+  let lastTriggerTs = 0;
+  const triggerThrottledUpdate = (immediate = false) => {
+    const now = Date.now();
+    if (!immediate && now - lastTriggerTs < 2500) return;
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(
+      () => {
+        lastTriggerTs = Date.now();
+        onUpdate();
+      },
+      immediate ? 80 : 200
+    );
+  };
+
+  let bc = null;
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      bc = new BroadcastChannel(CHATBOT_SYNC_CHANNEL);
+      bc.onmessage = (event) => {
+        if (event?.data?.type === 'CHATBOT_UPDATED') {
+          triggerThrottledUpdate(true);
+        }
+      };
+    }
+  } catch (_) {}
+
+  const handleStorage = (event) => {
+    if (event.key === CHATBOT_STORAGE_KEY) {
+      triggerThrottledUpdate(true);
+    }
+  };
+
+  const handleCustom = () => triggerThrottledUpdate(true);
+  const handleFocusOrVisibility = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+      triggerThrottledUpdate(false);
+    }
+  };
+
+  window.addEventListener('storage', handleStorage);
+  window.addEventListener('chatbotHistorialActualizado', handleCustom);
+  window.addEventListener('focus', handleFocusOrVisibility);
+  document.addEventListener('visibilitychange', handleFocusOrVisibility);
+
+  return () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    if (bc) {
+      try {
+        bc.close();
+      } catch (_) {}
+    }
+    window.removeEventListener('storage', handleStorage);
+    window.removeEventListener('chatbotHistorialActualizado', handleCustom);
+    window.removeEventListener('focus', handleFocusOrVisibility);
+    document.removeEventListener('visibilitychange', handleFocusOrVisibility);
+  };
+}
 
 /**
  * Lista las conversaciones del chatbot con filtros multicategoría (AND / OR),

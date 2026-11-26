@@ -5,6 +5,7 @@ import { authHeaders } from '../services/authService';
 import {
   getConversacionesChatbotAdmin,
   getConversacionChatbotDetalleAdmin,
+  suscribirActualizacionChatbot,
 } from '../services/api';
 
 const CATEGORIAS_DEFAULT = [
@@ -140,6 +141,12 @@ export default function AdminChatbotList() {
     return () => {
       active = false;
     };
+  }, [fetchConversaciones]);
+
+  useEffect(() => {
+    return suscribirActualizacionChatbot(() => {
+      fetchConversaciones();
+    });
   }, [fetchConversaciones]);
 
   const toggleCategoria = (catId) => {

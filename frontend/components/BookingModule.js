@@ -47,6 +47,7 @@ export default function BookingModule() {
   const [errorMsg, setErrorMsg] = useState('');
   const [stylistOffDayInfo, setStylistOffDayInfo] = useState(null);
   const [blockedDayReason, setBlockedDayReason] = useState('');
+  const [fechaHoy, setFechaHoy] = useState('');
 
   // Self-Service Management State ('manage' tab)
   const [lookupId, setLookupId] = useState('');
@@ -261,6 +262,16 @@ export default function BookingModule() {
     );
 
     if (date) {
+      const { fechaHoy: hoyActual } = obtenerFechaHoraSistemaCliente();
+      if (date < hoyActual) {
+        setStylistOffDayInfo(null);
+        setBlockedDayReason('');
+        setAvailableSlots([]);
+        setTime('');
+        setLoadingSlots(false);
+        return;
+      }
+
       const infoHorario = obtenerInfoHorarioEstilista(targetStylist, targetStylistName, date);
       if (!infoHorario.trabajaEseDia) {
         setStylistOffDayInfo(infoHorario);
@@ -331,25 +342,34 @@ useEffect(() => {
   return () => unsubscribe();
 }, [refreshBookingSlots]);
 
-// Re-validar periódicamente contra el reloj del sistema para descartar bloques que queden en el pasado mientras el formulario está abierto
+// Inicializar fechaHoy solo en el cliente (evita que el `min` del datepicker quede congelado en la fecha del build SSG)
+// y re-validar periódicamente contra el reloj del sistema para descartar bloques que queden en el pasado
 useEffect(() => {
+  const sincronizarReloj = () => {
+    const { fechaHoy: hoyActual } = obtenerFechaHoraSistemaCliente();
+    setFechaHoy((prev) => (prev === hoyActual ? prev : hoyActual));
+    return hoyActual;
+  };
+
+  sincronizarReloj();
+
   const timer = setInterval(() => {
-    const { fechaHoy } = obtenerFechaHoraSistemaCliente();
-      if (date && date === fechaHoy) {
-        setAvailableSlots((prev) => {
-          const filtered = filtrarHorariosSegunRelojSistema(prev, date);
-          setTime((currTime) => (filtered.includes(currTime) ? currTime : filtered[0] || ''));
-          return filtered;
-        });
-      }
-      if (isRescheduling && newDate === fechaHoy) {
-        setRescheduleSlots((prev) => {
-          const filtered = filtrarHorariosSegunRelojSistema(prev, newDate);
-          setNewTime((currTime) => (filtered.includes(currTime) ? currTime : filtered[0] || ''));
-          return filtered;
-        });
-      }
-    }, 30000);
+    const hoyActual = sincronizarReloj();
+    if (date && date === hoyActual) {
+      setAvailableSlots((prev) => {
+        const filtered = filtrarHorariosSegunRelojSistema(prev, date);
+        setTime((currTime) => (filtered.includes(currTime) ? currTime : filtered[0] || ''));
+        return filtered;
+      });
+    }
+    if (isRescheduling && newDate === hoyActual) {
+      setRescheduleSlots((prev) => {
+        const filtered = filtrarHorariosSegunRelojSistema(prev, newDate);
+        setNewTime((currTime) => (filtered.includes(currTime) ? currTime : filtered[0] || ''));
+        return filtered;
+      });
+    }
+  }, 30000);
   return () => clearInterval(timer);
 }, [date, isRescheduling, newDate]);
 
@@ -413,6 +433,16 @@ useEffect(() => {
     const svcId = managedReserva.servicio_id || selectedService || servicios[0]?.id || '1';
     const svcObj = servicios.find((s) => String(s.id) === String(svcId));
     const duracion = resolverDuracionServicio(svcId, svcObj?.duracion_min, servicios);
+
+    const { fechaHoy: hoyActual } = obtenerFechaHoraSistemaCliente();
+    if (newDate < hoyActual) {
+      setRescheduleOffDayInfo(null);
+      setRescheduleBlockedDayReason('');
+      setRescheduleSlots([]);
+      setNewTime('');
+      setLoadingRescheduleSlots(false);
+      return;
+    }
 
     const infoHorario = obtenerInfoHorarioEstilista(estId, estNombre, newDate);
     if (!infoHorario.trabajaEseDia) {
@@ -903,10 +933,15 @@ return (
                           type="button"
                           className="btn-manage-action btn-manage-reschedule"
                           onClick={() => {
+                            const { fechaHoy: hoyActual } = obtenerFechaHoraSistemaCliente();
                             setIsRescheduling(true);
                             setConfirmCancelAsk(false);
                             setManageError('');
-                            setNewDate(managedReserva.fecha || new Date().toISOString().split('T')[0]);
+                            setNewDate(
+                              managedReserva.fecha && managedReserva.fecha >= hoyActual
+                                ? managedReserva.fecha
+                                : hoyActual
+                            );
                           }}
                           disabled={manageLoading}
                         >
@@ -964,7 +999,7 @@ return (
                           <input
                             className="form-input"
                             type="date"
-                            min={obtenerFechaHoraSistemaCliente().fechaHoy}
+                            min={fechaHoy || undefined}
                             value={newDate}
                             onChange={(e) => setNewDate(e.target.value)}
                             required
@@ -1013,9 +1048,11 @@ return (
                                 ))
                               ) : (
                                 <p className="time-slots-empty">
-                                  {newDate === obtenerFechaHoraSistemaCliente().fechaHoy
-                                    ? 'No quedan bloques disponibles posteriores a la hora actual para hoy. Selecciona otra fecha.'
-                                    : 'No hay horarios libres para esta fecha.'}
+                                  {fechaHoy && newDate && newDate < fechaHoy
+                                    ? 'No es posible reprogramar a una fecha pasada. Selecciona hoy o una fecha futura.'
+                                    : fechaHoy && newDate === fechaHoy
+                                      ? 'No quedan bloques disponibles posteriores a la hora actual para hoy. Selecciona otra fecha.'
+                                      : 'No hay horarios libres para esta fecha.'}
                                 </p>
                               )}
                           </div>
@@ -1255,7 +1292,7 @@ return (
                     <input
                       className="form-input"
                       type="date"
-                      min={obtenerFechaHoraSistemaCliente().fechaHoy}
+                      min={fechaHoy || undefined}
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
                       required
@@ -1314,9 +1351,11 @@ return (
                           ))
                         ) : (
                           <p className="time-slots-empty">
-                            {(date || obtenerFechaHoraSistemaCliente().fechaHoy) === obtenerFechaHoraSistemaCliente().fechaHoy
-                              ? 'No quedan bloques horarios posteriores a la hora actual para hoy. Seleccione una fecha futura.'
-                              : 'No hay turnos libres para esta combinación.'}
+                            {fechaHoy && date && date < fechaHoy
+                              ? 'No es posible agendar en una fecha pasada. Seleccione hoy o una fecha futura.'
+                              : fechaHoy && (date || fechaHoy) === fechaHoy
+                                ? 'No quedan bloques horarios posteriores a la hora actual para hoy. Seleccione una fecha futura.'
+                                : 'No hay turnos libres para esta combinación.'}
                           </p>
                         )}
                     </div>

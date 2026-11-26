@@ -788,10 +788,42 @@ export function calcularSlotsPorServicio({
 
 /**
  * Obtiene la fecha ("YYYY-MM-DD") y hora ("HH:MM", minutos desde medianoche)
- * actual del reloj del sistema.
+ * actual del reloj del sistema en la zona horaria operativa (America/Santiago),
+ * alineada con el backend para evitar desfases entre navegador y servidor.
  */
 export function obtenerFechaHoraSistemaCliente() {
   const ahora = new Date();
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Santiago',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(ahora);
+
+    const year = parts.find((p) => p.type === 'year')?.value;
+    const month = parts.find((p) => p.type === 'month')?.value;
+    const day = parts.find((p) => p.type === 'day')?.value;
+    const rawHour = parts.find((p) => p.type === 'hour')?.value || '00';
+    const hour = (rawHour === '24' ? '00' : rawHour).padStart(2, '0');
+    const minute = (parts.find((p) => p.type === 'minute')?.value || '00').padStart(2, '0');
+
+    if (year && month && day) {
+      const horas = Number(hour);
+      const minutos = Number(minute);
+      return {
+        fechaHoy: `${year}-${month}-${day}`,
+        horaActual: `${hour}:${minute}`,
+        minutosActuales: horas * 60 + minutos,
+      };
+    }
+  } catch (_) {
+    // Fallback al reloj local si Intl/timeZone no está disponible
+  }
+
   const pad = (n) => String(n).padStart(2, '0');
   const fechaHoy = `${ahora.getFullYear()}-${pad(ahora.getMonth() + 1)}-${pad(ahora.getDate())}`;
   const horas = ahora.getHours();
@@ -1396,6 +1428,21 @@ export async function getDisponibilidadDetallada({
   listaServicios = [],
 }) {
   const duracion = resolverDuracionServicio(servicio_id, duracion_min, listaServicios);
+
+  // Evitar peticiones innecesarias (HTTP 400) cuando la fecha es anterior a hoy
+  if (fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+    const { fechaHoy } = obtenerFechaHoraSistemaCliente();
+    if (fecha < fechaHoy) {
+      return {
+        slots: [],
+        trabajaEseDia: true,
+        bloqueadoDiaCompleto: false,
+        motivoBloqueo: null,
+        fechaPasada: true,
+      };
+    }
+  }
+
   const infoHorario = obtenerInfoHorarioEstilista(estilista_id, estilista_nombre, fecha);
 
   if (fecha && !infoHorario.trabajaEseDia) {
@@ -1404,6 +1451,7 @@ export async function getDisponibilidadDetallada({
       trabajaEseDia: false,
       bloqueadoDiaCompleto: false,
       motivoBloqueo: null,
+      fechaPasada: false,
     };
   }
 
@@ -1423,6 +1471,7 @@ export async function getDisponibilidadDetallada({
         trabajaEseDia: local.trabajaEseDia,
         bloqueadoDiaCompleto: false,
         motivoBloqueo: null,
+        fechaPasada: false,
       };
     }
 
@@ -1438,7 +1487,22 @@ export async function getDisponibilidadDetallada({
 
     const url = `${baseUrl}/disponibilidad?${qs.toString()}`;
     const res = await fetchWithTimeout(url, { cache: 'no-store' }, 7000);
-    if (!res.ok) throw new Error('Error al obtener disponibilidad');
+
+    // HTTP 4xx son errores de validación de negocio (ej. fecha pasada), NO backend caído
+    if (res.status >= 400 && res.status < 500) {
+      const errJson = await res.json().catch(() => ({}));
+      const errMsg = String(errJson.message || '');
+      return {
+        slots: [],
+        trabajaEseDia: true,
+        bloqueadoDiaCompleto: false,
+        motivoBloqueo: null,
+        fechaPasada: /pasad/i.test(errMsg),
+        errorValidacion: errMsg || 'Parámetros de disponibilidad inválidos.',
+      };
+    }
+
+    if (!res.ok) throw new Error(`HTTP ${res.status} al obtener disponibilidad`);
     const json = await res.json();
 
     if (json.data?.trabaja_ese_dia === false) {
@@ -1447,6 +1511,7 @@ export async function getDisponibilidadDetallada({
         trabajaEseDia: false,
         bloqueadoDiaCompleto: false,
         motivoBloqueo: null,
+        fechaPasada: false,
       };
     }
 
@@ -1456,6 +1521,7 @@ export async function getDisponibilidadDetallada({
         trabajaEseDia: true,
         bloqueadoDiaCompleto: true,
         motivoBloqueo: json.data?.motivo_bloqueo || 'Día bloqueado por administración',
+        fechaPasada: false,
       };
     }
 
@@ -1465,6 +1531,7 @@ export async function getDisponibilidadDetallada({
       trabajaEseDia: true,
       bloqueadoDiaCompleto: false,
       motivoBloqueo: null,
+      fechaPasada: false,
     };
   } catch (err) {
     console.warn('Backend API inaccesible, usando cálculo local por duración de servicio:', err.message);
@@ -1489,6 +1556,7 @@ export async function getDisponibilidadDetallada({
       trabajaEseDia: local.trabajaEseDia,
       bloqueadoDiaCompleto: conBloqueos.bloqueadoDiaCompleto,
       motivoBloqueo: conBloqueos.motivoBloqueo,
+      fechaPasada: false,
     };
   }
 }

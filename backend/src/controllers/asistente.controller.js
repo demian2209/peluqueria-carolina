@@ -167,9 +167,30 @@ async function construirContextoNegocio() {
   return cachedContexto;
 }
 
+const DEFAULT_GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'];
+
+function obtenerModelosGemini() {
+  const envModels = (process.env.GEMINI_MODELS || process.env.GEMINI_MODEL || '')
+    .split(',')
+    .map((m) => m.trim())
+    .filter(Boolean);
+  return envModels.length > 0 ? envModels : DEFAULT_GEMINI_MODELS;
+}
+
+function construirThinkingConfig(modelo) {
+  if (/^gemini-2\.5/i.test(modelo)) {
+    return { thinkingBudget: 0 };
+  }
+  if (/^gemini-3/i.test(modelo)) {
+    return { thinkingLevel: 'minimal' };
+  }
+  return undefined;
+}
+
 /**
  * Fallback directo y rápido hacia Google Gemini API si n8n Cloud está en cold start o saturado.
  * Devuelve { respuesta, categorias } (salida estructurada JSON con clasificación multicategoría).
+ * Recorre una lista resiliente de modelos ante errores de cuota (429), disponibilidad (404/5xx) o timeout.
  * Si el modo JSON es rechazado (HTTP 400), reintenta en texto plano y clasifica por palabras clave.
  */
 async function consultarGeminiDirecto(mensajeLimpio) {
@@ -177,13 +198,15 @@ async function consultarGeminiDirecto(mensajeLimpio) {
   if (!apiKey) return null;
 
   const contexto = await construirContextoNegocio();
+  const modelos = obtenerModelosGemini();
 
-  const llamarGemini = async (estructurado) => {
+  const llamarGemini = async (modelo, estructurado) => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
+    const thinkingConfig = construirThinkingConfig(modelo);
     try {
       return await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent',
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelo)}:generateContent`,
         {
           method: 'POST',
           headers: {
@@ -207,7 +230,7 @@ async function consultarGeminiDirecto(mensajeLimpio) {
             generationConfig: {
               temperature: 0.3,
               maxOutputTokens: 1024,
-              thinkingConfig: { thinkingLevel: 'minimal' },
+              ...(thinkingConfig ? { thinkingConfig } : {}),
               ...(estructurado
                 ? { responseMimeType: 'application/json', responseSchema: RESPONSE_SCHEMA_GEMINI }
                 : {}),
@@ -221,31 +244,51 @@ async function consultarGeminiDirecto(mensajeLimpio) {
     }
   };
 
-  let estructurado = true;
-  let res = await llamarGemini(true);
-  if (!res.ok && res.status === 400) {
-    estructurado = false;
-    res = await llamarGemini(false);
+  for (const modelo of modelos) {
+    try {
+      let estructurado = true;
+      let res = await llamarGemini(modelo, true);
+      if (!res.ok && res.status === 400) {
+        estructurado = false;
+        res = await llamarGemini(modelo, false);
+      }
+
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => '');
+        console.warn(
+          `[Asistente IA] Gemini modelo ${modelo} respondió HTTP ${res.status}: ${errBody.replace(/\s+/g, ' ').slice(0, 180)}`
+        );
+        continue;
+      }
+
+      const data = await res.json();
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      const raw = parts
+        .filter((p) => !p.thought)
+        .map((p) => p.text || '')
+        .join('')
+        .trim();
+
+      const parsed = estructurado
+        ? parsearRespuestaEstructurada(raw)
+        : { respuesta: raw.slice(0, 1500), categorias: [] };
+
+      if (!parsed.respuesta) {
+        console.warn(`[Asistente IA] Gemini modelo ${modelo} devolvió respuesta vacía, probando siguiente modelo.`);
+        continue;
+      }
+
+      return {
+        respuesta: parsed.respuesta,
+        categorias: normalizarCategorias(parsed.categorias, mensajeLimpio),
+        modelo,
+      };
+    } catch (err) {
+      console.warn(`[Asistente IA] Error consultando Gemini modelo ${modelo}: ${err.message}`);
+    }
   }
-  if (!res.ok) return null;
 
-  const data = await res.json();
-  const parts = data?.candidates?.[0]?.content?.parts || [];
-  const raw = parts
-    .filter((p) => !p.thought)
-    .map((p) => p.text || '')
-    .join('')
-    .trim();
-
-  const parsed = estructurado
-    ? parsearRespuestaEstructurada(raw)
-    : { respuesta: raw.slice(0, 1500), categorias: [] };
-
-  if (!parsed.respuesta) return null;
-  return {
-    respuesta: parsed.respuesta,
-    categorias: normalizarCategorias(parsed.categorias, mensajeLimpio),
-  };
+  return null;
 }
 
 /**

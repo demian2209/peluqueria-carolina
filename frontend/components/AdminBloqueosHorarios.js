@@ -65,11 +65,17 @@ export default function AdminBloqueosHorarios() {
   const [filtroTipo, setFiltroTipo] = useState('all');
   const [filtroEstado, setFiltroEstado] = useState('activos');
 
-  // Estado del formulario de creación
-  const { fechaHoy } = obtenerFechaHoraSistemaCliente();
+  // Estado del formulario de creación (fechaHoy hidratada solo en cliente para evitar desfase SSR/SSG)
+  const [fechaHoy, setFechaHoy] = useState('');
   const [estilistaId, setEstilistaId] = useState('todos');
   const [tipo, setTipo] = useState('fecha'); // 'fecha' | 'recurrente'
-  const [fecha, setFecha] = useState(fechaHoy);
+  const [fecha, setFecha] = useState('');
+
+  useEffect(() => {
+    const { fechaHoy: hoy } = obtenerFechaHoraSistemaCliente();
+    setFechaHoy(hoy);
+    setFecha((prev) => prev || hoy);
+  }, []);
   const [diaSemana, setDiaSemana] = useState(1);
   const [diaCompleto, setDiaCompleto] = useState(false);
   const [horaInicio, setHoraInicio] = useState('13:00');
